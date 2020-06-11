@@ -12,11 +12,11 @@ import au.com.dw.contentprovidertester.query.model.SecondaryQuery
 class LogQuery {
     val tag = "ContentQuery"
 
-    fun query(context: Context, params: QueryParam) {
-        query(context, params, emptyList())
+    fun query(context: Context, params: QueryParam): Boolean {
+        return query(context, params, emptyList())
     }
 
-    fun query(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>) {
+    fun query(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>): Boolean {
         Log.i(tag, "Content Provider query")
 
         // params
@@ -25,6 +25,8 @@ class LogQuery {
         Log.i(tag, "selection = " + params.selection)
         Log.i(tag, "selectionArgs = " + params.selectionArgs?.joinToString(","))
         Log.i(tag, "sortOrder = " + params.sortOrder)
+
+        // todo log secondary lookup query params
 
         val query = ContentResolverQuery()
         val queryResult = query.processQuery(context, params, secondaryQueries)
@@ -46,5 +48,6 @@ class LogQuery {
         {
             Log.e(tag, "status = ERROR")
         }
+        return (queryResult is Result.Success)
     }
 }
