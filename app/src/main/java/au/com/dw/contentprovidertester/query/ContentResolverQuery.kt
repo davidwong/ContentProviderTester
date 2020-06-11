@@ -4,29 +4,35 @@ import android.content.Context
 import android.database.Cursor
 import android.database.SQLException
 import android.net.Uri
+import android.util.Log
+import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
+import au.com.dw.contentprovidertester.data.Result
+import java.io.IOException
 
 /**
  * Generic utility for querying content provider using ContentResolver.query().
  * Subclass to handle what to do with the query results.
  */
-abstract class ContentResolverQuery {
-
-    fun processQuery(context: Context, params: QueryParam)
-    {
-        processQuery(context, params, emptyList())
-    }
+class ContentResolverQuery {
 
     /**
      * This the entry into the query process.
      */
-    public fun processQuery(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>)
+    public fun processQuery(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>): Result<QueryResult>
     {
-        val startTime = System.nanoTime()
-        var queryResult = query(context, params, { s -> s }, secondaryQueries)
-        val finishTime = System.nanoTime()
-        processResult(queryResult, params, finishTime - startTime)
+        try {
+            val startTime = System.nanoTime()
+            var queryResult = query(context, params, { s -> s }, secondaryQueries)
+            val finishTime = System.nanoTime()
+
+            return Result.Success(processResult(queryResult, params, finishTime - startTime))
+        } catch (e: Exception)
+        {
+            Result.Error(e)
+        }
+        return Result.Error(IOException("Error in query to ContentResolver"))
     }
 
     /**
@@ -37,12 +43,17 @@ abstract class ContentResolverQuery {
         val cursor = try {
             context.contentResolver
                 .query(Uri.parse(params.uri), params.projection, params.selection, params.selectionArgs, params.sortOrder)
+            // for testing
+//            throw SecurityException("TEST")
         } catch (e: SQLException) {
-            null
+            Log.e("QueryCursor", e.message)
+            throw e
         } catch (e: IllegalArgumentException) {
-            null
+            Log.e("QueryCursor", e.message)
+            throw e
         } catch (e: SecurityException) {
-            null
+            Log.e("QueryCursor", e.message)
+            throw e
         }
         return cursor
     }
@@ -133,5 +144,8 @@ abstract class ContentResolverQuery {
         return row
     }
 
-    abstract fun processResult(result: List<MutableMap<String, Any>>, params: QueryParam, executionTime: Long)
+    private fun processResult(result: List<MutableMap<String, Any>>, params: QueryParam, executionTime: Long): QueryResult
+    {
+        return QueryResult(params, result, executionTime)
+    }
 }

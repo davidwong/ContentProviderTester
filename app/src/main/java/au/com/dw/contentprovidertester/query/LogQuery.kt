@@ -1,16 +1,22 @@
 package au.com.dw.contentprovidertester.query
 
+import android.content.Context
 import android.util.Log
+import au.com.dw.contentprovidertester.data.Result
 import au.com.dw.contentprovidertester.query.model.QueryParam
+import au.com.dw.contentprovidertester.query.model.SecondaryQuery
 
 /**
  * Content provider query that logs the results to logCat.
  */
-class LogQuery : ContentResolverQuery() {
+class LogQuery {
     val tag = "ContentQuery"
 
-    override fun processResult(result: List<MutableMap<String, Any>>, params: QueryParam, executionTime: Long) {
+    fun query(context: Context, params: QueryParam) {
+        query(context, params, emptyList())
+    }
 
+    fun query(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>) {
         Log.i(tag, "Content Provider query")
 
         // params
@@ -20,15 +26,25 @@ class LogQuery : ContentResolverQuery() {
         Log.i(tag, "selectionArgs = " + params.selectionArgs?.joinToString(","))
         Log.i(tag, "sortOrder = " + params.sortOrder)
 
-        Log.i(tag, "result count = " + result.count())
-        val time = (executionTime /  1E6).toString() + " ms"
-        Log.i(tag, "execution time = " + time)
+        val query = ContentResolverQuery()
+        val queryResult = query.processQuery(context, params, secondaryQueries)
+        if (queryResult is Result.Success) {
 
-        var counter = 1
-        val indent = "  "
-        result.forEach { map ->
-            Log.i(tag, "Row " + counter++)
-            map.forEach { k, v ->  Log.i(tag, indent + k + " = " + v)}
+            Log.i(tag, "status = Success")
+            Log.i(tag, "result count = " + queryResult.data.results.count())
+            val time = (queryResult.data.executionTime / 1E6).toString() + " ms"
+            Log.i(tag, "execution time = " + time)
+
+            var counter = 1
+            val indent = "  "
+            queryResult.data.results.forEach { map ->
+                Log.i(tag, "Row " + counter++)
+                map.forEach { k, v -> Log.i(tag, indent + k + " = " + v) }
+            }
+        }
+        else
+        {
+            Log.e(tag, "status = ERROR")
         }
     }
 }
