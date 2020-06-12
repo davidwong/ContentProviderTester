@@ -34,8 +34,7 @@ class LogQuery {
 
             Log.i(tag, "status = Success")
             Log.i(tag, "result count = " + queryResult.data.results.count())
-            val time = (queryResult.data.executionTime / 1E6).toString() + " ms"
-            Log.i(tag, "execution time = " + time)
+            Log.i(tag, "execution time = " + executionTimeDisplay(queryResult.data.executionTime))
 
             var counter = 1
             val indent = "  "

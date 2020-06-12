@@ -33,14 +33,15 @@ class JsonQuery(val prettyPrint: Boolean) {
         }
 
         val query = ContentResolverQuery()
+        // for debugging
+//        val query = ContentResolverQueryWithDebugLog()
         val queryResult = query.processQuery(context, params, secondaryQueries)
 
         if (queryResult is Result.Success) {
 
             rootElement.asJsonObject.addProperty("status", "Success")
             rootElement.asJsonObject.addProperty("result count", queryResult.data.results.count())
-            val time = (queryResult.data.executionTime / 1E6).toString() + " ms"
-            rootElement.asJsonObject.addProperty("execution time", time)
+            rootElement.asJsonObject.addProperty("execution time", executionTimeDisplay(queryResult.data.executionTime))
 
             val resultJson = JsonObject()
             var counter = 1

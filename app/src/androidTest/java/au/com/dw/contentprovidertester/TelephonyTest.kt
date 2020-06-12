@@ -49,7 +49,7 @@ class TelephonyTest {
     }
 
     @Test
-    fun querySmsMmsConversationWithCanonicalPhoneNumberLookup() {
+    fun querySmsMmsConversationWithPhoneNumberLookup() {
         // content://mms-sms/conversations
         val params = QueryParam(uri = Telephony.Threads.CONTENT_URI.toString() + "?simple=true",
             projection = arrayOf(Telephony.ThreadsColumns._ID, Telephony.ThreadsColumns.RECIPIENT_IDS))
@@ -61,6 +61,7 @@ class TelephonyTest {
         assertTrue(queryProcessor.query(context, params, listOf(secondaryQuery)))
     }
 
+    // secondary lookup doesn't find contact
     @Test
     fun querySmsMmsConversationWithContactsPhoneNumberLookup() {
         // content://mms-sms/conversations

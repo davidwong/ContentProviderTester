@@ -13,6 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.RecyclerView
 import au.com.dw.contentprovidertester.R
+import au.com.dw.contentprovidertester.query.executionTimeDisplay
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.ui.RecyclerAdapter.RowViewHolder
 import au.com.dw.contentprovidertester.ui.login.LoginViewModel
@@ -23,6 +24,8 @@ class ResultActivity : AppCompatActivity() {
     private lateinit var adapter: RecyclerAdapter
     private lateinit var recyclerView: RecyclerView
 
+    val newLine = "\n"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_result)
@@ -32,23 +35,30 @@ class ResultActivity : AppCompatActivity() {
         adapter = RecyclerAdapter()
 
         val extras = intent.extras
+
+        val results = extras?.get(RESULT_KEY) as List<Map<String, Any>>
+        if (results != null) {
+            adapter.results = results
+        }
         val params = extras?.get(PARAM_KEY)
         if (params != null)
         {
-            queryDetails.text = getParamString(params as QueryParam)
+            var paramText = getParamString(params as QueryParam)
+            // add metadata
+            paramText += "result count = " + results?.count() + newLine
+
+            val time = extras?.getLong(TIME_KEY, 0L)
+            paramText += "execution time = " + executionTimeDisplay(time)
+
+            queryDetails.text = paramText
         }
 
-        val results = extras?.get(RESULT_KEY)
-        if (results != null)
-        {
-            adapter.results = results as List<Map<String, Any>>
-        }
         recyclerView.adapter = adapter
     }
 
     private fun getParamString(params: QueryParam): String
     {
-        val newLine = "\n"
+
         val builder = StringBuilder()
         builder.append("Results of ContentResolver Query" + newLine)
             .append("uri = " + params.uri + newLine)
@@ -56,7 +66,6 @@ class ResultActivity : AppCompatActivity() {
             .append("selection = " + params.selection + newLine)
             .append("selectionArgs = " + params.selectionArgs.toString() + newLine)
             .append("sortOrder = " + params.sortOrder + newLine)
-            .append("Execution time: " + "234")
         return  builder.toString()
     }
 }
@@ -74,14 +83,14 @@ class RecyclerAdapter : RecyclerView.Adapter<RowViewHolder>()  {
     }
 
     override fun onBindViewHolder(holder: RowViewHolder, position: Int) {
-        holder?.bind(results[position])
+        holder?.bind(results[position], position)
     }
 
     class RowViewHolder(val rowView: View) : RecyclerView.ViewHolder(rowView) {
         private val rowTextView: TextView = rowView.findViewById<TextView>(R.id.row)
 
-        fun bind(row: Map<String, Any>) {
-            var rowDisplay: String = ""
+        fun bind(row: Map<String, Any>, position: Int) {
+            var rowDisplay: String = "Row " + (position + 1) + ": "
             row.forEach {
                 rowDisplay += it.key + "=" + it.value + ", "
             }
