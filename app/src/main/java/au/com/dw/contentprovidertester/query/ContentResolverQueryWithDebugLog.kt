@@ -5,15 +5,17 @@ import android.database.Cursor
 import android.database.SQLException
 import android.net.Uri
 import android.util.Log
+import au.com.dw.contentprovidertester.data.Result
 import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
-import au.com.dw.contentprovidertester.data.Result
 import java.io.IOException
 
 /**
  * Generic utility for querying content provider using ContentResolver.query().
  * Subclass to handle what to do with the query results.
+ *
+ * Should be the same code as ContentResolverQuery but with debug logging added.
  */
 class ContentResolverQueryWithDebugLog {
 

@@ -7,7 +7,7 @@ import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
 
 /**
- * Content provider query that logs the results to logCat.
+ * Content provider query processor that logs the results as individual logs to logCat.
  */
 class LogQuery {
     val tag = "ContentQuery"

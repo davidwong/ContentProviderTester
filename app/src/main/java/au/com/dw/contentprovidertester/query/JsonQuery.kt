@@ -2,15 +2,15 @@ package au.com.dw.contentprovidertester.query
 
 import android.content.Context
 import android.util.Log
+import au.com.dw.contentprovidertester.data.Result
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
-import au.com.dw.contentprovidertester.data.Result
 
 /**
- * Content provider query that serializes the results to JSON and logs it to logCat.
+ * Content provider query processor that serializes the results to JSON and logs it to logCat.
  */
 class JsonQuery(val prettyPrint: Boolean) {
     val tag = "ContentQuery"

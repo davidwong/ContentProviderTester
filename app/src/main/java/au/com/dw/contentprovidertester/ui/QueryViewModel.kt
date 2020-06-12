@@ -1,21 +1,20 @@
-package au.com.dw.contentprovidertester.ui.login
+package au.com.dw.contentprovidertester.ui
 
 import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import android.util.Patterns
 import au.com.dw.contentprovidertester.R
 import au.com.dw.contentprovidertester.data.Result
 import au.com.dw.contentprovidertester.query.ContentResolverQuery
 import au.com.dw.contentprovidertester.query.model.QueryParam
 
-class LoginViewModel(private val loginRepository: ContentResolverQuery) : ViewModel() {
+class QueryViewModel(private val loginRepository: ContentResolverQuery) : ViewModel() {
 
-    private val _loginResult = MutableLiveData<LoginResult>()
-    val loginResult: LiveData<LoginResult> = _loginResult
+    private val queryResult = MutableLiveData<QueryDisplayResult>()
+    val queryDisplayResult: LiveData<QueryDisplayResult> = queryResult
 
-    fun login(context: Context, username: String, password: String, selection: String, selectionArgs: String, sortOrder: String) {
+    fun processQuery(context: Context, username: String, password: String, selection: String, selectionArgs: String, sortOrder: String) {
         // can be launched in a separate asynchronous job
         val queryParam = QueryParam(username, checkStringArray(password),
             checkString(selection), checkStringArray(selectionArgs), checkString(sortOrder))
@@ -23,9 +22,11 @@ class LoginViewModel(private val loginRepository: ContentResolverQuery) : ViewMo
 
         // end repo
         if (result is Result.Success) {
-            _loginResult.value = LoginResult(success = result.data)
+            queryResult.value =
+                QueryDisplayResult(success = result.data)
         } else {
-            _loginResult.value = LoginResult(error = R.string.login_failed)
+            queryResult.value =
+                QueryDisplayResult(error = R.string.query_failed)
         }
     }
 

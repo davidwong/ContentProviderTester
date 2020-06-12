@@ -1,7 +1,5 @@
 package au.com.dw.contentprovidertester.data
 
-import au.com.dw.contentprovidertester.data.model.QueryResult
-
 /**
  * A generic class that holds a value with its loading status.
  * @param <T>

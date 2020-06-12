@@ -5,10 +5,10 @@ import android.database.Cursor
 import android.database.SQLException
 import android.net.Uri
 import android.util.Log
+import au.com.dw.contentprovidertester.data.Result
 import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
-import au.com.dw.contentprovidertester.data.Result
 import java.io.IOException
 
 /**

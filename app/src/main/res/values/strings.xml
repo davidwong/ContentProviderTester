@@ -1,16 +1,14 @@
 <resources>
     <string name="app_name">ContentProviderTester</string>
 
-    <!-- Strings related to login -->
-    <string name="prompt_email">uri</string>
-    <string name="prompt_password">projection</string>
+    <!-- Strings related to querying -->
+    <string name="prompt_uri">uri</string>
+    <string name="prompt_projection">projection</string>
     <string name="prompt_selection">selection</string>
     <string name="prompt_selection_args">selectionArgs</string>
     <string name="prompt_sort_order">sortOrder</string>
-    <string name="action_sign_in">Sign in or register</string>
+    <string name="action_query">Query</string>
     <string name="action_sign_in_short">Sign in</string>
-    <string name="welcome">"Welcome !"</string>
     <string name="invalid_username">Not a valid username</string>
-    <string name="invalid_password">Password must be >5 characters</string>
-    <string name="login_failed">"Login failed"</string>
+    <string name="query_failed">"Query failed"</string>
 </resources>
