@@ -3,6 +3,7 @@ package au.com.dw.contentprovidertester
 import android.Manifest
 import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -13,9 +14,14 @@ import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import au.com.dw.contentprovidertester.ui.PARAM_KEY
+import au.com.dw.contentprovidertester.ui.RESULT_KEY
+import au.com.dw.contentprovidertester.ui.ResultActivity
+import au.com.dw.contentprovidertester.ui.TIME_KEY
 import au.com.dw.contentprovidertester.ui.login.LoginViewModel
 import au.com.dw.contentprovidertester.ui.login.LoginViewModelFactory
 import com.livinglifetechway.quickpermissions_kotlin.runWithPermissions
+import java.io.Serializable
 
 class MainActivity : AppCompatActivity() {
 
@@ -47,6 +53,12 @@ class MainActivity : AppCompatActivity() {
             if (loginResult.success != null) {
                 // todo show results
                 Toast.makeText(applicationContext, loginResult.success.results.count().toString(), Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, ResultActivity::class.java)
+                // unfortunately difficult to make QueryResult parcelable due to List<Map>> type in results
+                intent.putExtra(PARAM_KEY, loginResult.success.params)
+                intent.putExtra(RESULT_KEY, loginResult.success.results as Serializable)
+                intent.putExtra(TIME_KEY, loginResult.success.executionTime)
+                startActivity(intent)
             }
             setResult(Activity.RESULT_OK)
 
