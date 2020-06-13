@@ -19,7 +19,7 @@ import org.junit.Test
 /**
  * Instrumented test to see the results of ContentResolver queries for Telephony content provider.
  */
-class TelephonyTest {
+class TelephonyConversationTest {
     @Rule
     @JvmField
     var mRuntimePermissionRule: GrantPermissionRule =
@@ -37,6 +37,13 @@ class TelephonyTest {
     fun querySmsMmsConversationAllColumns() {
         val params = QueryParam(uri = Telephony.Threads.CONTENT_URI.toString())
         val queryProcessor = LogQuery()
+        assertTrue(queryProcessor.query(context, params))
+    }
+
+    @Test
+    fun querySmsMmsConversationSimpleAllColumns() {
+        val params = QueryParam(uri = Telephony.Threads.CONTENT_URI.toString() + "?simple=true")
+        val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params))
     }
 
@@ -90,6 +97,28 @@ class TelephonyTest {
         // content://sms/conversations
         // msg_count, thread_id, snippet
         val params = QueryParam(uri = Telephony.Sms.Conversations.CONTENT_URI.toString())
+
+        val queryProcessor = JsonQuery(true)
+        assertTrue(queryProcessor.query(context, params))
+    }
+
+    @Test
+    fun queryCompleteConversation() {
+        // if this URI undocumented? Cannot have null projection or will cause error
+        // projection can use any combination of the column fields in android.provider.Telephony.Mms
+        // and android.provider.Telephony.Sms
+        val params = QueryParam(uri = "content://mms-sms/complete-conversations",
+            projection = arrayOf(Telephony.MmsSms.TYPE_DISCRIMINATOR_COLUMN, Telephony.Sms.ADDRESS,
+                Telephony.Sms.THREAD_ID))
+
+        val queryProcessor = JsonQuery(true)
+        assertTrue(queryProcessor.query(context, params))
+    }
+
+    @Test
+    fun queryAllConversation() {
+        // content://mms-sms/conversations
+        val params = QueryParam(uri = Telephony.MmsSms.CONTENT_CONVERSATIONS_URI.toString())
 
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params))
