@@ -74,10 +74,9 @@ class ContentResolverQueryWithDebugLog {
         val result = mutableListOf<MutableMap<String, Any>>()
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                val columns = if (params.projection != null) params.projection else cursor.columnNames
-                Log.d(debugTag, "Columns: " + columns.joinToString(","))
+                Log.d(debugTag, "Columns: " + cursor.columnNames.joinToString(","))
 
-                val rowMap = mapRow(context, cursor, columns, nameKey, secondaryQueries)
+                val rowMap = mapRow(context, cursor, cursor.columnNames, nameKey, secondaryQueries)
                 result += rowMap
             } while (cursor.moveToNext())
         }

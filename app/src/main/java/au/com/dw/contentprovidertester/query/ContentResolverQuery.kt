@@ -67,8 +67,7 @@ class ContentResolverQuery {
         val result = mutableListOf<MutableMap<String, Any>>()
         if (cursor != null && cursor.moveToFirst()) {
             do {
-                val columns = if (params.projection != null) params.projection else cursor.columnNames
-                val rowMap = mapRow(context, cursor, columns, nameKey, secondaryQueries)
+                val rowMap = mapRow(context, cursor, cursor.columnNames, nameKey, secondaryQueries)
                 result += rowMap
             } while (cursor.moveToNext())
         }

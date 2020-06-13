@@ -8,6 +8,8 @@ import au.com.dw.contentprovidertester.query.model.SecondaryQuery
 
 /**
  * Content provider query processor that logs the results as individual logs to logCat.
+ * Generally JsonQuery gives you a clearer view of the data, but sometimes the data will
+ * exceed the maximum limit for a log statement. LogQuery can be used in this case.
  */
 class LogQuery {
     val tag = "ContentQuery"
