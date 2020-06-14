@@ -12,7 +12,7 @@ import com.google.gson.JsonObject
 /**
  * Content provider query processor that serializes the results to JSON and logs it to logCat.
  */
-class JsonQuery(val prettyPrint: Boolean) {
+open class JsonQuery(var prettyPrint: Boolean) {
     val tag = "ContentQuery"
 
     fun query(context: Context, params: QueryParam): Boolean {
@@ -57,8 +57,15 @@ class JsonQuery(val prettyPrint: Boolean) {
             rootElement.asJsonObject.addProperty("status", "ERROR")
         }
         jsonObject.add("Content Provider query", rootElement)
-        Log.i(tag, gson.toJson(jsonObject))
+        val saved = output(gson.toJson(jsonObject))
 
-        return (queryResult is Result.Success)
+        return (queryResult is Result.Success && saved)
     }
+
+    protected open fun output(json: String): Boolean {
+        Log.i(tag, json)
+        return true
+    }
+
+
 }

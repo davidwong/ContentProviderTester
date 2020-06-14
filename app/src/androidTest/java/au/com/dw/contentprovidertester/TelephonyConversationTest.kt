@@ -3,9 +3,14 @@ package au.com.dw.contentprovidertester
 import android.Manifest
 import android.content.Context
 import android.provider.ContactsContract
-import android.provider.Telephony
+import android.provider.Telephony.Sms
+import android.provider.Telephony.Mms
+import android.provider.Telephony.MmsSms
+import android.provider.Telephony.Threads
+import android.provider.Telephony.ThreadsColumns
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
+import au.com.dw.contentprovidertester.query.JsonFileQuery
 import au.com.dw.contentprovidertester.query.JsonQuery
 import au.com.dw.contentprovidertester.query.LogQuery
 import au.com.dw.contentprovidertester.query.model.QueryParam
@@ -35,22 +40,22 @@ class TelephonyConversationTest {
 
     @Test
     fun querySmsMmsConversationAllColumns() {
-        val params = QueryParam(uri = Telephony.Threads.CONTENT_URI.toString())
+        val params = QueryParam(uri = Threads.CONTENT_URI.toString())
         val queryProcessor = LogQuery()
         assertTrue(queryProcessor.query(context, params))
     }
 
     @Test
     fun querySmsMmsConversationSimpleAllColumns() {
-        val params = QueryParam(uri = Telephony.Threads.CONTENT_URI.toString() + "?simple=true")
+        val params = QueryParam(uri = Threads.CONTENT_URI.toString() + "?simple=true")
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params))
     }
 
     @Test
     fun querySmsMmsConversationSimple() {
-        val params = QueryParam(uri = Telephony.Threads.CONTENT_URI.toString() + "?simple=true",
-            projection = arrayOf(Telephony.ThreadsColumns._ID, Telephony.ThreadsColumns.RECIPIENT_IDS))
+        val params = QueryParam(uri = Threads.CONTENT_URI.toString() + "?simple=true",
+            projection = arrayOf(ThreadsColumns._ID, ThreadsColumns.RECIPIENT_IDS))
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params))
     }
@@ -58,12 +63,12 @@ class TelephonyConversationTest {
     @Test
     fun querySmsMmsConversationWithPhoneNumberLookup() {
         // content://mms-sms/conversations
-        val params = QueryParam(uri = Telephony.Threads.CONTENT_URI.toString() + "?simple=true",
-            projection = arrayOf(Telephony.ThreadsColumns._ID, Telephony.ThreadsColumns.RECIPIENT_IDS))
+        val params = QueryParam(uri = Threads.CONTENT_URI.toString() + "?simple=true",
+            projection = arrayOf(ThreadsColumns._ID, ThreadsColumns.RECIPIENT_IDS))
 
         val secondaryParam = QueryParam(uri = "content://mms-sms/canonical-addresses", projection = arrayOf("address"),
             selection = "_id=?")
-        val secondaryQuery = SecondaryQuery(lookup = Telephony.ThreadsColumns.RECIPIENT_IDS, queryParam = secondaryParam)
+        val secondaryQuery = SecondaryQuery(lookup = ThreadsColumns.RECIPIENT_IDS, queryParam = secondaryParam)
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params, listOf(secondaryQuery)))
     }
@@ -72,12 +77,12 @@ class TelephonyConversationTest {
     @Test
     fun querySmsMmsConversationWithContactsPhoneNumberLookup() {
         // content://mms-sms/conversations
-        val params = QueryParam(uri = Telephony.Threads.CONTENT_URI.toString() + "?simple=true",
-            projection = arrayOf(Telephony.ThreadsColumns._ID, Telephony.ThreadsColumns.RECIPIENT_IDS))
+        val params = QueryParam(uri = Threads.CONTENT_URI.toString() + "?simple=true",
+            projection = arrayOf(ThreadsColumns._ID, ThreadsColumns.RECIPIENT_IDS))
 
         val secondaryParam = QueryParam(uri = ContactsContract.CommonDataKinds.Phone.CONTENT_URI.toString(),
             selection = ContactsContract.CommonDataKinds.Phone.CONTACT_ID +"=?")
-        val secondaryQuery = SecondaryQuery(lookup = Telephony.ThreadsColumns.RECIPIENT_IDS, queryParam = secondaryParam)
+        val secondaryQuery = SecondaryQuery(lookup = ThreadsColumns.RECIPIENT_IDS, queryParam = secondaryParam)
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params, listOf(secondaryQuery)))
     }
@@ -85,8 +90,8 @@ class TelephonyConversationTest {
     @Test
     fun querySmsConversation() {
         // content://sms/conversations
-        val params = QueryParam(uri = Telephony.Sms.Conversations.CONTENT_URI.toString(),
-              projection = arrayOf(Telephony.Sms.Conversations.THREAD_ID, Telephony.Sms.Conversations.SNIPPET))
+        val params = QueryParam(uri = Sms.Conversations.CONTENT_URI.toString(),
+              projection = arrayOf(Sms.Conversations.THREAD_ID, Sms.Conversations.SNIPPET))
 
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params))
@@ -96,7 +101,7 @@ class TelephonyConversationTest {
     fun querySmsConversationAllColumns() {
         // content://sms/conversations
         // msg_count, thread_id, snippet
-        val params = QueryParam(uri = Telephony.Sms.Conversations.CONTENT_URI.toString())
+        val params = QueryParam(uri = Sms.Conversations.CONTENT_URI.toString())
 
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params))
@@ -108,19 +113,96 @@ class TelephonyConversationTest {
         // projection can use any combination of the column fields in android.provider.Telephony.Mms
         // and android.provider.Telephony.Sms
         val params = QueryParam(uri = "content://mms-sms/complete-conversations",
-            projection = arrayOf(Telephony.MmsSms.TYPE_DISCRIMINATOR_COLUMN, Telephony.Sms.ADDRESS,
-                Telephony.Sms.THREAD_ID))
+            projection = arrayOf(MmsSms.TYPE_DISCRIMINATOR_COLUMN, Sms.ADDRESS,
+                Sms.THREAD_ID))
 
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params))
     }
 
     @Test
-    fun queryAllConversation() {
+    fun saveConversation() {
         // content://mms-sms/conversations
-        val params = QueryParam(uri = Telephony.MmsSms.CONTENT_CONVERSATIONS_URI.toString())
+        val params = QueryParam(uri = MmsSms.CONTENT_CONVERSATIONS_URI.toString())
 
-        val queryProcessor = JsonQuery(true)
+        val queryProcessor = JsonFileQuery(true, context,"mms-sms-conversations.json")
         assertTrue(queryProcessor.query(context, params))
     }
+
+    @Test
+    fun saveConversationSample() {
+        // content://mms-sms/conversations
+        val params = QueryParam(uri = MmsSms.CONTENT_CONVERSATIONS_URI.toString(), projection = arrayOf(
+            Sms.ADDRESS,
+            Sms.DATE,
+            Sms.BODY,
+            Sms.PERSON,
+            Sms.THREAD_ID,
+            Mms.DATE,
+            Mms.THREAD_ID))
+
+        val queryProcessor = JsonFileQuery(true, context,"mms-sms-conversations-sample.json")
+        assertTrue(queryProcessor.query(context, params))
+    }
+
+    @Test
+    fun saveCompleteConversation() {
+        val params = QueryParam(uri = "content://mms-sms/complete-conversations",
+            projection = arrayOf(
+                MmsSms.TYPE_DISCRIMINATOR_COLUMN,
+                MmsSms._ID,
+                Mms.DATE,
+                Mms.DATE_SENT,
+                Mms.READ,
+                Mms.THREAD_ID,
+                Mms.LOCKED,
+
+                Sms.ADDRESS,
+                Sms.BODY,
+                Sms.SEEN,
+                Sms.TYPE,
+                Sms.STATUS,
+                Sms.ERROR_CODE,
+
+                Mms.SUBJECT,
+                Mms.SUBJECT_CHARSET,
+                Mms.SEEN,
+                Mms.MESSAGE_TYPE,
+                Mms.MESSAGE_BOX,
+                Mms.DELIVERY_REPORT,
+                Mms.READ_REPORT,
+                MmsSms.PendingMessages.ERROR_TYPE,
+                Mms.STATUS
+            ))
+
+        val queryProcessor = JsonFileQuery(true, context,"mms-sms-complete-conversations.json")
+        assertTrue(queryProcessor.query(context, params))
+    }
+
+    @Test
+    fun saveCompleteConversationSample() {
+        val params = QueryParam(uri = "content://mms-sms/complete-conversations",
+            projection = arrayOf(MmsSms.TYPE_DISCRIMINATOR_COLUMN,
+                Sms.ADDRESS,
+                Sms.DATE,
+                Sms.BODY,
+                Sms.PERSON,
+                Sms.THREAD_ID,
+                Mms.DATE,
+                Mms.THREAD_ID))
+
+        val queryProcessor = JsonFileQuery(true, context,"mms-sms-complete-conversations-sample.json")
+        assertTrue(queryProcessor.query(context, params))
+    }
+
+    @Test
+    fun saveSmsConversationAllColumns() {
+        // content://sms/conversations
+        // msg_count, thread_id, snippet
+        val params = QueryParam(uri = Sms.Conversations.CONTENT_URI.toString())
+
+        val queryProcessor = JsonFileQuery(true, context,"sms-conversations.json")
+        assertTrue(queryProcessor.query(context, params))
+    }
+
 }
