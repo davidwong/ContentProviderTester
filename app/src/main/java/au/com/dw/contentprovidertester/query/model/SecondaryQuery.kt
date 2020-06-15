@@ -11,5 +11,6 @@ package au.com.dw.contentprovidertester.query.model
  */
 data class SecondaryQuery(
     val lookup: String,
-    val queryParam: QueryParam
+    val queryParam: QueryParam,
+    val appendUri: Boolean = false
 )

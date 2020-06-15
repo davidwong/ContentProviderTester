@@ -2,6 +2,7 @@ package au.com.dw.contentprovidertester
 
 import android.Manifest
 import android.content.Context
+import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.Telephony
 import androidx.test.platform.app.InstrumentationRegistry
@@ -37,7 +38,7 @@ class TelephonyInboxTest {
     @Test
     fun querySmsInboxAllColumns() {
         //
-        val params = QueryParam(uri = "content://sms/inbox")
+        val params = QueryParam(uri = Uri.parse("content://sms/inbox"))
 
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params))
@@ -48,7 +49,7 @@ class TelephonyInboxTest {
     fun querySmsInboxForThread() {
         fail("choose your own thread_id before running, e.g. from SMS conversation query")
         // content://sms/inbox
-        val params = QueryParam(uri = Telephony.Sms.Inbox.CONTENT_URI.toString(), projection = arrayOf(Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox.BODY), selection = "thread_id=14")
+        val params = QueryParam(uri = Telephony.Sms.Inbox.CONTENT_URI, projection = arrayOf(Telephony.Sms.Inbox.DATE, Telephony.Sms.Inbox.BODY), selection = "thread_id=14")
 
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params))

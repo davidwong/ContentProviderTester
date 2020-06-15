@@ -1,5 +1,6 @@
 package au.com.dw.contentprovidertester.query.model
 
+import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
 
@@ -8,14 +9,14 @@ import android.os.Parcelable
  * in the results.
  */
 data class QueryParam (
-    val uri: String,
+    val uri: Uri,
     val projection: Array<String>? = null,
     val selection: String? = null,
     val selectionArgs: Array<String>? = null,
     val sortOrder: String? = null
 ) : Parcelable {
     constructor(parcel: Parcel) : this(
-        parcel.readString()!!,
+        parcel.readParcelable(Uri::class.java.classLoader)!!,
         parcel.createStringArray(),
         parcel.readString(),
         parcel.createStringArray(),
@@ -24,7 +25,7 @@ data class QueryParam (
     }
 
     override fun writeToParcel(parcel: Parcel, flags: Int) {
-        parcel.writeString(uri)
+        parcel.writeParcelable(uri, flags)
         parcel.writeStringArray(projection)
         parcel.writeString(selection)
         parcel.writeStringArray(selectionArgs)
@@ -45,3 +46,4 @@ data class QueryParam (
         }
     }
 }
+

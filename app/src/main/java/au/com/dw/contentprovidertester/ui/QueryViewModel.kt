@@ -1,6 +1,7 @@
 package au.com.dw.contentprovidertester.ui
 
 import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,7 +17,8 @@ class QueryViewModel(private val loginRepository: ContentResolverQuery) : ViewMo
 
     fun processQuery(context: Context, username: String, password: String, selection: String, selectionArgs: String, sortOrder: String) {
         // can be launched in a separate asynchronous job
-        val queryParam = QueryParam(username, checkStringArray(password),
+        val queryParam = QueryParam(
+            Uri.parse(username), checkStringArray(password),
             checkString(selection), checkStringArray(selectionArgs), checkString(sortOrder))
         val result = loginRepository.processQuery(context, queryParam, emptyList())
 
