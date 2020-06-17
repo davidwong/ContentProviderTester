@@ -1,13 +1,13 @@
 package au.com.dw.contentprovidertester.query
 
 import android.content.Context
+import android.net.Uri
 import android.util.Log
 import au.com.dw.contentprovidertester.data.Result
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
-import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
+import com.google.gson.*
+
 
 /**
  * Content provider query processor that serializes the results to JSON and logs it to logCat.
@@ -20,9 +20,13 @@ open class JsonQuery(var prettyPrint: Boolean) {
     }
 
     fun query(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>): Boolean {
-        val gson = if (prettyPrint) GsonBuilder().setPrettyPrinting().create() else Gson()
+
+        val gson = if (prettyPrint) GsonBuilder().setPrettyPrinting().addSerializationExclusionStrategy(UriExclusionStrategy()).create() else GsonBuilder().addSerializationExclusionStrategy(UriExclusionStrategy()).create()
         val jsonObject = JsonObject()
+        // uri excluded as not working
         val rootElement = gson.toJsonTree(params)
+        // add uri back as string
+        rootElement.asJsonObject.addProperty("uri", params.uri.toString())
 
         if (secondaryQueries.isNotEmpty())
         {
@@ -66,6 +70,18 @@ open class JsonQuery(var prettyPrint: Boolean) {
         Log.i(tag, json)
         return true
     }
+}
 
+// filter out uri from QueryParam in JSON, as not working for toJsonTree()
+class UriExclusionStrategy: ExclusionStrategy {
+    override fun shouldSkipField(field: FieldAttributes): Boolean {
+        if (field.declaredType == Uri::class.java && field.name == "uri") {
+            return true
+        }
+        return false
+    }
 
+    override fun shouldSkipClass(clazz: Class<*>?): Boolean {
+        return false
+    }
 }
