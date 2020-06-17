@@ -24,6 +24,9 @@ import org.junit.Test
 
 /**
  * Instrumented test to see the results of ContentResolver queries for Telephony content provider.
+ *
+ * Note: The URI content://mms-sms/conversations may not work on Samsung devices. May need to add
+ * '?simple=true' or use content://mms-sms/complete-conversations instead.
  */
 class TelephonyConversationTest {
     @Rule
@@ -85,7 +88,7 @@ class TelephonyConversationTest {
         // content://mms-sms/conversations
         // same as MmsSms.CONTENT_CONVERSATIONS_URI?
         val params = QueryParam(uri = Threads.CONTENT_URI,
-            projection = arrayOf(ThreadsColumns._ID, Sms.DATE, Sms.ADDRESS))
+            projection = arrayOf(ThreadsColumns._ID, Sms.DATE, Sms.ADDRESS, Sms.BODY, Sms.THREAD_ID, ThreadsColumns.DATE))
 
         val secondaryParam = QueryParam(uri = ContactsContract.PhoneLookup.CONTENT_FILTER_URI, projection = arrayOf(ContactsContract.PhoneLookup._ID,
             ContactsContract.PhoneLookup.LOOKUP_KEY,
@@ -121,8 +124,8 @@ class TelephonyConversationTest {
         // projection can use any combination of the column fields in android.provider.Telephony.Mms
         // and android.provider.Telephony.Sms
         val params = QueryParam(uri = Uri.parse("content://mms-sms/complete-conversations"),
-            projection = arrayOf(MmsSms.TYPE_DISCRIMINATOR_COLUMN, Sms.ADDRESS,
-                Sms.THREAD_ID))
+            projection = arrayOf(MmsSms.TYPE_DISCRIMINATOR_COLUMN, ThreadsColumns.DATE, Sms.ADDRESS,
+                Sms.THREAD_ID, Sms.BODY))
 
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params))
