@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun methodRequiresPermissions(context: Context, uri: String, projection: String,
                 selection: String, selectionArgs: String, sortOrder: String) = runWithPermissions(Manifest.permission.READ_CONTACTS, Manifest.permission.READ_SMS) {
-        Toast.makeText(this, "Cal and microphone permissions granted", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "Read contacts and SMS permissions granted", Toast.LENGTH_LONG).show()
         queryViewModel.processQuery(applicationContext, uri,
             projection,
             selection,

@@ -55,35 +55,12 @@ class TelephonySmsInboxTest {
         assertTrue(queryProcessor.query(context, params))
     }
 
-    /**
-     * Group SMS inbox messages by thread.
-     * Idea from
-     * https://stackoverflow.com/questions/2315203/android-distinct-and-groupby-in-contentresolver/4470227
-     *
-     * Note that the 'IS NOT NULL' condition is only required because of the way the ContentResolver
-     * adds brackets to the database query.
-     */
-    @Test
-    fun querySmsInboxByThread() {
-        // content://sms/inbox
-        // SELECT DISTINCT thread_id, _id, address, body, date FROM sms_restricted WHERE (type=1) AND (thread_id IS NOT NULL) GROUP BY (thread_id) ORDER BY date DESC
-        val params = QueryParam(uri = Inbox.CONTENT_URI, projection = arrayOf("DISTINCT " + Inbox.THREAD_ID,Inbox._ID, Inbox.ADDRESS, Inbox.BODY, Inbox.DATE),
-            selection = Inbox.THREAD_ID + " IS NOT NULL) GROUP BY (" + Inbox.THREAD_ID, sortOrder = Inbox.DEFAULT_SORT_ORDER)
-
-        val queryProcessor = JsonQuery(true)
-        assertTrue(queryProcessor.query(context, params))
-    }
-
     @Test
     fun querySmsInboxWithPhoneNumberLookup() {
-        //
         val params = QueryParam(uri = Inbox.CONTENT_URI, projection = arrayOf(Inbox._ID, Inbox.ADDRESS, Inbox.BODY, Inbox.DATE),
             sortOrder = Inbox.DEFAULT_SORT_ORDER)
 
-        val secondaryParam = QueryParam(uri = ContactsContract.PhoneLookup.CONTENT_FILTER_URI, projection = arrayOf(ContactsContract.PhoneLookup._ID,
-            ContactsContract.PhoneLookup.LOOKUP_KEY,
-            ContactsContract.PhoneLookup.DISPLAY_NAME))
-        val secondaryQuery = SecondaryQuery(lookup = Telephony.Sms.ADDRESS, queryParam = secondaryParam, appendUri = true)
+        val secondaryQuery = getPhoneLookupForContactQuery()
 
         val queryProcessor = JsonQuery(true)
         assertTrue(queryProcessor.query(context, params, listOf(secondaryQuery)))
@@ -106,16 +83,6 @@ class TelephonySmsInboxTest {
             sortOrder = Inbox.DEFAULT_SORT_ORDER)
 
         val queryProcessor = JsonFileQuery(true, context,"sms-inbox.json")
-        assertTrue(queryProcessor.query(context, params))
-    }
-
-    @Test
-    fun saveSmsInboxByThread() {
-        // SELECT DISTINCT thread_id, _id, address, body, date FROM sms_restricted WHERE (type=1) AND (thread_id IS NOT NULL) GROUP BY (thread_id) ORDER BY date DESC
-        val params = QueryParam(uri = Uri.parse("content://sms/inbox"), projection = arrayOf("DISTINCT " + Inbox.THREAD_ID,Inbox._ID, Inbox.ADDRESS, Inbox.BODY, Inbox.DATE),
-            selection = Inbox.THREAD_ID + " IS NOT NULL) GROUP BY (" + Inbox.THREAD_ID, sortOrder = Inbox.DEFAULT_SORT_ORDER)
-
-        val queryProcessor = JsonFileQuery(true, context,"sms-inbox-thread.json")
         assertTrue(queryProcessor.query(context, params))
     }
 
