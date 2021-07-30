@@ -49,13 +49,13 @@ class ContentResolverQuery(var isDebug: Boolean = false) {
             // for testing
 //            throw SecurityException("TEST")
         } catch (e: SQLException) {
-            Log.e("QueryCursor", e.message)
+            e.message?.let { Log.e("QueryCursor", it) }
             throw e
         } catch (e: IllegalArgumentException) {
-            Log.e("QueryCursor", e.message)
+            e.message?.let { Log.e("QueryCursor", it) }
             throw e
         } catch (e: SecurityException) {
-            Log.e("QueryCursor", e.message)
+            e.message?.let { Log.e("QueryCursor", it) }
             throw e
         }
         return cursor

@@ -471,6 +471,52 @@ class ContactsDisplayNameTest(val contactDetails: NamePhoneInput, val displayNam
         }
         cursor?.close()
     }
+
+    @Test
+    fun getDisplayNameFromVCard()
+    {
+        var tempDisplayName: String? = null
+
+        val firstName: String? = contactDetails.firstName
+        val surname: String? = contactDetails.surname
+
+        if (firstName == null && surname == null)
+        {
+            // both names are null, then use first phone number if available
+            if (contactDetails.firstPhone != null)
+            {
+                tempDisplayName = contactDetails.firstPhone
+            }
+        }
+        else
+        {
+            var aggregatedName: String? = null
+            if (firstName != null && surname != null)
+            {
+                aggregatedName = firstName + " " + surname
+            }
+            else if (surname == null)
+            {
+                aggregatedName = firstName
+            }
+            else if (firstName == null)
+            {
+                aggregatedName = surname
+            }
+
+            if (!(aggregatedName!!.trim().length == 0))
+            {
+                tempDisplayName = aggregatedName.trim()
+            }
+        }
+        if (NULL.equals(displayName))
+        {
+            assertNull(tempDisplayName)
+        }
+        else {
+            assertEquals(displayName, tempDisplayName)
+        }
+    }
 }
 
 data class NamePhoneInput(

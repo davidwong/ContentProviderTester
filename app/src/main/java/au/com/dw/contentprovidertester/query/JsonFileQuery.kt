@@ -36,7 +36,7 @@ class JsonFileQuery(prettyPrint: Boolean, var context: Context, var fileName: St
             Log.i(tag, "Content provider query JSON written to " + file.absoluteFile)
             return true
         } catch (e: IOException) {
-            Log.e(tag, e.message)
+            e.message?.let { Log.e(tag, it) }
         }
         return false
     }
