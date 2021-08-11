@@ -1,2 +1,3 @@
 include ':app'
+include ':tableview'
 rootProject.name = "ContentProviderTester"

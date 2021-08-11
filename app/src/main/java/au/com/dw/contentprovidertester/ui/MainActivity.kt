@@ -44,17 +44,21 @@ class MainActivity : AppCompatActivity() {
             val queryResult = it ?: return@Observer
 
             loading.visibility = View.GONE
-            if (queryResult.error != null) {
-                showQueryFailed(queryResult.error)
-            }
-            if (queryResult.success != null) {
-                 val intent = Intent(this, ResultActivity::class.java)
-                // unfortunately difficult to make QueryResult parcelable due to List<Map>> type in results
-                intent.putExtra(PARAM_KEY, queryResult.success.params)
-                intent.putExtra(RESULT_KEY, queryResult.success.results as Serializable)
-                intent.putExtra(TIME_KEY, queryResult.success.executionTime)
-                startActivity(intent)
-            }
+//            if (queryResult.error != null) {
+//                showQueryFailed(queryResult.error)
+//            }
+//            if (queryResult.success != null) {
+//                 val intent = Intent(this, ResultActivity::class.java)
+//                // unfortunately difficult to make QueryResult parcelable due to List<Map>> type in results
+//                intent.putExtra(PARAM_KEY, queryResult.success.params)
+//                intent.putExtra(RESULT_KEY, queryResult.success.results as Serializable)
+//                intent.putExtra(TIME_KEY, queryResult.success.executionTime)
+//                startActivity(intent)
+//            }
+//            if (queryResult.success != null) {
+//                val intent = Intent(this, ResultTableActivity::class.java)
+//                startActivity(intent)
+//            }
             setResult(Activity.RESULT_OK)
 
             //Complete and destroy query activity once successful

@@ -37,14 +37,14 @@ class ResultActivity : AppCompatActivity() {
         if (results != null) {
             adapter.results = results
         }
-        val params = extras?.get(PARAM_KEY)
+        val params = extras.get(PARAM_KEY)
         if (params != null)
         {
             var paramText = getParamString(params as QueryParam)
             // add metadata
-            paramText += "result count = " + results?.count() + newLine
+            paramText += "result count = " + results.count() + newLine
 
-            val time = extras?.getLong(TIME_KEY, 0L)
+            val time = extras.getLong(TIME_KEY, 0L)
             paramText += "execution time = " + executionTimeDisplay(time)
 
             queryDetails.text = paramText
@@ -71,7 +71,7 @@ class RecyclerAdapter : RecyclerView.Adapter<RowViewHolder>()  {
     var results: List<Map<String, Any>> = ArrayList<Map<String, Any>>()
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RowViewHolder {
-        var view = LayoutInflater.from(parent?.context).inflate(R.layout.list_content, parent, false)
+        var view = LayoutInflater.from(parent.context).inflate(R.layout.list_content, parent, false)
         return RowViewHolder(view)
     }
 
@@ -80,7 +80,7 @@ class RecyclerAdapter : RecyclerView.Adapter<RowViewHolder>()  {
     }
 
     override fun onBindViewHolder(holder: RowViewHolder, position: Int) {
-        holder?.bind(results[position], position)
+        holder.bind(results[position], position)
     }
 
     class RowViewHolder(val rowView: View) : RecyclerView.ViewHolder(rowView) {

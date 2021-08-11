@@ -4,8 +4,10 @@ import android.content.Context
 import android.net.Uri
 import android.util.Log
 import au.com.dw.contentprovidertester.data.Result
+import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
+import au.com.dw.contentprovidertester.ui.QueryDisplayResult
 import com.google.gson.*
 
 
@@ -41,11 +43,13 @@ open class JsonQuery(var prettyPrint: Boolean) {
 //        val query = ContentResolverQueryWithDebugLog()
         val queryResult = query.processQuery(context, params, secondaryQueries)
 
-        if (queryResult is Result.Success) {
+        if (queryResult is QueryDisplayResult.Success<*>) {
+
+            val resultData = queryResult.data as QueryResult
 
             rootElement.asJsonObject.addProperty("status", "Success")
-            rootElement.asJsonObject.addProperty("result count", queryResult.data.results.count())
-            rootElement.asJsonObject.addProperty("execution time", executionTimeDisplay(queryResult.data.executionTime))
+            rootElement.asJsonObject.addProperty("result count", resultData.results.count())
+            rootElement.asJsonObject.addProperty("execution time", executionTimeDisplay(resultData.executionTime))
 
             val resultJson = JsonObject()
             var counter = 1
@@ -63,7 +67,7 @@ open class JsonQuery(var prettyPrint: Boolean) {
         jsonObject.add("Content Provider query", rootElement)
         val saved = output(gson.toJson(jsonObject))
 
-        return (queryResult is Result.Success && saved)
+        return (queryResult is QueryDisplayResult.Success<*> && saved)
     }
 
     protected open fun output(json: String): Boolean {

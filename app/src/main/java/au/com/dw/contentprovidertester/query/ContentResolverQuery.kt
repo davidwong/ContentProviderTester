@@ -9,6 +9,7 @@ import au.com.dw.contentprovidertester.data.Result
 import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
+import au.com.dw.contentprovidertester.ui.QueryDisplayResult
 import java.io.IOException
 
 /**
@@ -22,7 +23,7 @@ class ContentResolverQuery(var isDebug: Boolean = false) {
     /**
      * This the entry into the query process.
      */
-    public fun processQuery(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>): Result<QueryResult>
+    fun processQuery(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>): QueryDisplayResult<Any>
     {
         try {
             val startTime = System.nanoTime()
@@ -30,12 +31,12 @@ class ContentResolverQuery(var isDebug: Boolean = false) {
             val finishTime = System.nanoTime()
 
             // ignore timings in debug mode, due to debug logging adding extra time
-            return Result.Success(processResult(queryResult, params, if (isDebug) 0 else finishTime - startTime))
+            return QueryDisplayResult.Success(processResult(queryResult, params, if (isDebug) 0 else finishTime - startTime))
         } catch (e: Exception)
         {
-            Result.Error(e)
+            QueryDisplayResult.Error(e)
         }
-        return Result.Error(IOException("Error in query to ContentResolver"))
+        return QueryDisplayResult.Error(IOException("Error in query to ContentResolver"))
     }
 
     /**
