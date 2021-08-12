@@ -4,11 +4,6 @@ import androidx.annotation.NonNull
 import androidx.annotation.Nullable
 import com.evrencoskun.tableview.sort.ISortableModel
 
-
-
-
-
-
 open class Cell(@NonNull var mId: String, @Nullable var data: Any?) : ISortableModel {
 
     override fun getId(): String {
@@ -21,9 +16,14 @@ open class Cell(@NonNull var mId: String, @Nullable var data: Any?) : ISortableM
 
 }
 
-//class ColumnHeader(val data: String)
-//
-//class RowHeader(val data: String)
-
 class ColumnHeader(@NonNull id: String, @Nullable data: Any?) : Cell(id, data)
 class RowHeader(@NonNull id: String, @Nullable data: Any?) : Cell(id, data)
+
+/**
+ * Holder for data to pass on to the adapter of a TableView.
+ */
+data class TableListsHolder (
+    val columnHeaders : List<ColumnHeader>,
+    val rowHeaders : List<RowHeader>,
+    val cells : List<Cell>
+    )

@@ -31,6 +31,7 @@ import android.widget.PopupMenu;
 
 import androidx.annotation.NonNull;
 
+import com.evrencoskun.tableview.MyTableView;
 import com.evrencoskun.tableview.TableView;
 import com.evrencoskun.tableview.sort.SortState;
 
@@ -51,10 +52,10 @@ public class ColumnHeaderLongPressPopup extends PopupMenu implements PopupMenu
     private static final int SCROLL_ROW = 5;
 
     @NonNull
-    private final TableView mTableView;
+    private final MyTableView mTableView;
     private final int mXPosition;
 
-    public ColumnHeaderLongPressPopup(@NonNull ColumnHeaderViewHolder viewHolder, @NonNull TableView tableView) {
+    public ColumnHeaderLongPressPopup(@NonNull ColumnHeaderViewHolder viewHolder, @NonNull MyTableView tableView) {
         super(viewHolder.itemView.getContext(), viewHolder.itemView);
         this.mTableView = tableView;
         this.mXPosition = viewHolder.getBindingAdapterPosition();

@@ -18,7 +18,7 @@ fun AppNavigation(vm: QueryViewModel) {
             QueryScreen( vm, navController)
         }
         composable(route = Screen.Result.route) {
-            ResultScreen()
+            ResultScreen(vm)
         }
     }
 }

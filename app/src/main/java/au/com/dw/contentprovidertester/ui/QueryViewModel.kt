@@ -1,20 +1,17 @@
 package au.com.dw.contentprovidertester.ui
 
-import android.app.DownloadManager
 import android.content.Context
 import android.net.Uri
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import au.com.dw.contentprovidertester.R
-import au.com.dw.contentprovidertester.data.Result
 import au.com.dw.contentprovidertester.query.ContentResolverQuery
 import au.com.dw.contentprovidertester.query.model.QueryParam
 
 class QueryViewModel(private val loginRepository: ContentResolverQuery) : ViewModel() {
 
-    private val queryResult = MutableLiveData<QueryDisplayResult<Any>>(QueryDisplayResult.Idle)
-    val queryDisplayResult : LiveData<QueryDisplayResult<Any>> = queryResult
+    private val queryResult = MutableLiveData<QueryUiState<Any>>(QueryUiState.Idle)
+    val queryUiState : LiveData<QueryUiState<Any>> = queryResult
 
     private val _name = MutableLiveData("")
     val name: LiveData<String> = _name
@@ -32,7 +29,6 @@ class QueryViewModel(private val loginRepository: ContentResolverQuery) : ViewMo
             checkString(selection), checkStringArray(selectionArgs), checkString(sortOrder))
         queryResult.value = loginRepository.processQuery(context, queryParam, emptyList())
 
-        val observerd = queryResult.hasActiveObservers()
         // end repo
 //        if (result is Result.Success) {
 //            queryResult.value =

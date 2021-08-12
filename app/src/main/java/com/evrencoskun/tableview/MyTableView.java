@@ -34,6 +34,14 @@ import android.view.Gravity;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.AttrRes;
+import androidx.annotation.ColorInt;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+
 import com.evrencoskun.tableview.adapter.AbstractTableAdapter;
 import com.evrencoskun.tableview.adapter.recyclerview.CellRecyclerView;
 import com.evrencoskun.tableview.adapter.recyclerview.holder.AbstractViewHolder;
@@ -56,19 +64,11 @@ import com.evrencoskun.tableview.listener.scroll.VerticalRecyclerViewListener;
 import com.evrencoskun.tableview.preference.SavedState;
 import com.evrencoskun.tableview.sort.SortState;
 
-import androidx.annotation.AttrRes;
-import androidx.annotation.ColorInt;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-
 /**
  * Created by evrencoskun on 11/06/2017.
  */
 
-public class TableView extends FrameLayout implements ITableView {
+public class MyTableView extends FrameLayout implements ITableView {
     @NonNull
     protected CellRecyclerView mCellRecyclerView;
     @NonNull
@@ -130,13 +130,13 @@ public class TableView extends FrameLayout implements ITableView {
 
     private boolean mReverseLayout = false;
 
-    public TableView(@NonNull Context context) {
+    public MyTableView(@NonNull Context context) {
         super(context);
         initialDefaultValues(null);
         initialize();
     }
 
-    public TableView(@NonNull Context context, CellAllowClick cellAllowClick) {
+    public MyTableView(@NonNull Context context, CellAllowClick cellAllowClick) {
         super(context);
         initialDefaultValues(null);
         mAllowClickInsideCell = cellAllowClick.isInsideCell();
@@ -145,13 +145,13 @@ public class TableView extends FrameLayout implements ITableView {
         initialize();
     }
 
-    public TableView(@NonNull Context context, @Nullable AttributeSet attrs) {
+    public MyTableView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
         initialDefaultValues(attrs);
         initialize();
     }
 
-    public TableView(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int
+    public MyTableView(@NonNull Context context, @Nullable AttributeSet attrs, @AttrRes int
             defStyleAttr) {
         super(context, attrs, defStyleAttr);
         initialDefaultValues(null);
@@ -169,7 +169,7 @@ public class TableView extends FrameLayout implements ITableView {
      * <p><b>Note:</b> If initialize is false you need to call {@code initilize()} method yourself.
      *
      */
-    public TableView(@NonNull Context context, boolean initialize) {
+    public MyTableView(@NonNull Context context, boolean initialize) {
         super(context);
         initialDefaultValues(null);
         if (initialize) initialize();
@@ -182,7 +182,7 @@ public class TableView extends FrameLayout implements ITableView {
                 .default_column_header_height);
 
         // Cornerview location
-        mCornerViewLocation = ITableView.CornerViewLocation.TOP_LEFT;
+        mCornerViewLocation = CornerViewLocation.TOP_LEFT;
 
         // Reverse Layout
         mReverseLayout = false;

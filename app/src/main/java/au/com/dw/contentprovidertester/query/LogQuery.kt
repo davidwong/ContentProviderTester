@@ -2,11 +2,10 @@ package au.com.dw.contentprovidertester.query
 
 import android.content.Context
 import android.util.Log
-import au.com.dw.contentprovidertester.data.Result
 import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
-import au.com.dw.contentprovidertester.ui.QueryDisplayResult
+import au.com.dw.contentprovidertester.ui.QueryUiState
 
 /**
  * Content provider query processor that logs the results as individual logs to logCat.
@@ -34,7 +33,7 @@ class LogQuery {
 
         val query = ContentResolverQuery()
         val queryResult = query.processQuery(context, params, secondaryQueries)
-        if (queryResult is QueryDisplayResult.Success<*>) {
+        if (queryResult is QueryUiState.Success<*>) {
             val resultData = queryResult.data as QueryResult
 
             Log.i(tag, "status = Success")
@@ -52,6 +51,6 @@ class LogQuery {
         {
             Log.e(tag, "status = ERROR")
         }
-        return (queryResult is QueryDisplayResult.Success<*>)
+        return (queryResult is QueryUiState.Success<*>)
     }
 }

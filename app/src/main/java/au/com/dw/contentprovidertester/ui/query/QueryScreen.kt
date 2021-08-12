@@ -1,6 +1,7 @@
 package au.com.dw.contentprovidertester.ui.query
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,35 +9,52 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.snapshots.Snapshot.Companion.observe
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.textInputServiceFactory
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
-import au.com.dw.contentprovidertester.data.Result
-import au.com.dw.contentprovidertester.data.model.QueryResult
-import au.com.dw.contentprovidertester.ui.QueryDisplayResult
+import au.com.dw.contentprovidertester.ui.QueryUiState
 import au.com.dw.contentprovidertester.ui.QueryViewModel
 import au.com.dw.contentprovidertester.ui.navigation.Screen
 
 @Composable
 fun QueryScreen(vm: QueryViewModel, navController: NavController)
 {
-    val queryResult = vm.queryDisplayResult.observeAsState()
-    val name: String by vm.name.observeAsState("")
+    val uiState = vm.queryUiState.observeAsState()
+    val scaffoldState = rememberScaffoldState()
 
-    if (queryResult.value is QueryDisplayResult.Success<*>)
-//    if (name.equals("done"))
+    if (uiState.value is QueryUiState.Success<*>)
     {
         navController.navigate(Screen.Result.route)
     }
-    else
-    {
+    else {
+        if (uiState.value is QueryUiState.Error) {
+            val error = uiState.value as QueryUiState.Error
+            Log.e("QueryScreen", "Query error", error.exception)
+
+            // `LaunchedEffect` will cancel and re-launch if
+            // `scaffoldState.snackbarHostState` changes
+            LaunchedEffect(scaffoldState.snackbarHostState) {
+                // Show snackbar using a coroutine, when the coroutine is cancelled the
+                // snackbar will automatically dismiss. This coroutine will cancel whenever
+                // `state.hasError` is false, and only start when `state.hasError` is true
+                // (due to the above if-check), or if `scaffoldState.snackbarHostState` changes.
+                scaffoldState.snackbarHostState.showSnackbar(
+                    message = "Error in query: " + error.exception.message
+                )
+            }
+        } else if (uiState.value is QueryUiState.Failure) {
+            val failure = uiState.value as QueryUiState.Failure
+            Log.e("QueryScreen", "Query failure: " + failure.message)
+
+            LaunchedEffect(scaffoldState.snackbarHostState) {
+                scaffoldState.snackbarHostState.showSnackbar(
+                    message = failure.message
+                )
+            }
+        }
         Scaffold(
+            scaffoldState = scaffoldState,
             topBar = {
                 TopAppBar(
                     title = {
@@ -45,14 +63,15 @@ fun QueryScreen(vm: QueryViewModel, navController: NavController)
                 )
             }
         ) { innerPadding ->
-            BodyContent(Modifier.padding(innerPadding), vm::onNameChange, vm::processQuery, navController)
+            QueryBodyContent(Modifier.padding(innerPadding), vm::processQuery)
         }
+
     }
 }
 
 
 @Composable
-fun BodyContent(modifier: Modifier = Modifier, onNameChange: (String) -> Unit, sendQuery: (Context, String, String, String, String, String) -> Unit, navController: NavController)
+fun QueryBodyContent(modifier: Modifier = Modifier, onQuery: (Context, String, String, String, String, String) -> Unit)
 {
     Column {
         var uri by remember { mutableStateOf("") }
@@ -91,10 +110,7 @@ fun BodyContent(modifier: Modifier = Modifier, onNameChange: (String) -> Unit, s
         {
             val context = LocalContext.current
             Button(
-//                onClick = { navController.navigate(Screen.Result.route) }
-
-                onClick = { sendQuery(context, uri, projection, selection, selectionArgs, sortOrder) }
-//                onClick = { onNameChange("done") }
+                onClick = { onQuery(context, uri, projection, selection, selectionArgs, sortOrder) }
             )
             {
                 Text("Query")

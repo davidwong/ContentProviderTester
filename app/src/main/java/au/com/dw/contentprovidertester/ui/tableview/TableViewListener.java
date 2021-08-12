@@ -30,6 +30,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.evrencoskun.tableview.MyTableView;
 import com.evrencoskun.tableview.TableView;
 import com.evrencoskun.tableview.listener.ITableViewListener;
 
@@ -44,9 +45,9 @@ public class TableViewListener implements ITableViewListener {
     @NonNull
     private final Context mContext;
     @NonNull
-    private final TableView mTableView;
+    private final MyTableView mTableView;
 
-    public TableViewListener(@NonNull TableView tableView) {
+    public TableViewListener(@NonNull MyTableView tableView) {
         this.mContext = tableView.getContext();
         this.mTableView = tableView;
     }

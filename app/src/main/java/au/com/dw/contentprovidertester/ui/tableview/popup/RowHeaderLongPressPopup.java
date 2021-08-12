@@ -32,6 +32,7 @@ import android.widget.PopupMenu;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.evrencoskun.tableview.MyTableView;
 import com.evrencoskun.tableview.TableView;
 
 import au.com.dw.contentprovidertester.R;
@@ -49,10 +50,10 @@ public class RowHeaderLongPressPopup extends PopupMenu implements PopupMenu
     private static final int REMOVE_ROW = 3;
 
     @NonNull
-    private final TableView mTableView;
+    private final MyTableView mTableView;
     private final int mRowPosition;
 
-    public RowHeaderLongPressPopup(@NonNull RecyclerView.ViewHolder viewHolder, @NonNull TableView tableView) {
+    public RowHeaderLongPressPopup(@NonNull RecyclerView.ViewHolder viewHolder, @NonNull MyTableView tableView) {
         super(viewHolder.itemView.getContext(), viewHolder.itemView);
 
         this.mTableView = tableView;

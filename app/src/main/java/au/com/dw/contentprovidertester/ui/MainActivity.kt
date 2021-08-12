@@ -3,7 +3,6 @@ package au.com.dw.contentprovidertester.ui
 import android.Manifest
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
@@ -16,7 +15,6 @@ import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import au.com.dw.contentprovidertester.R
 import com.livinglifetechway.quickpermissions_kotlin.runWithPermissions
-import java.io.Serializable
 
 /**
  * Get the ContentResolver query parameters from the user and do the query.
@@ -40,7 +38,7 @@ class MainActivity : AppCompatActivity() {
         queryViewModel = ViewModelProvider(this, QueryViewModelFactory())
             .get(QueryViewModel::class.java)
 
-        queryViewModel.queryDisplayResult.observe(this@MainActivity, Observer {
+        queryViewModel.queryUiState.observe(this@MainActivity, Observer {
             val queryResult = it ?: return@Observer
 
             loading.visibility = View.GONE

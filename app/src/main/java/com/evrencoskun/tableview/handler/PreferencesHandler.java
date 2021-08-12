@@ -26,6 +26,7 @@ package com.evrencoskun.tableview.handler;
 
 import androidx.annotation.NonNull;
 
+import com.evrencoskun.tableview.MyTableView;
 import com.evrencoskun.tableview.TableView;
 import com.evrencoskun.tableview.preference.Preferences;
 
@@ -39,7 +40,7 @@ public class PreferencesHandler {
     @NonNull
     private final SelectionHandler selectionHandler;
 
-    public PreferencesHandler(@NonNull TableView tableView) {
+    public PreferencesHandler(@NonNull MyTableView tableView) {
         this.scrollHandler = tableView.getScrollHandler();
         this.selectionHandler = tableView.getSelectionHandler();
     }

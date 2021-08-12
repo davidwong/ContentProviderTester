@@ -5,11 +5,10 @@ import android.database.Cursor
 import android.database.SQLException
 import android.net.Uri
 import android.util.Log
-import au.com.dw.contentprovidertester.data.Result
 import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
-import au.com.dw.contentprovidertester.ui.QueryDisplayResult
+import au.com.dw.contentprovidertester.ui.QueryUiState
 import java.io.IOException
 
 /**
@@ -23,7 +22,7 @@ class ContentResolverQuery(var isDebug: Boolean = false) {
     /**
      * This the entry into the query process.
      */
-    fun processQuery(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>): QueryDisplayResult<Any>
+    fun processQuery(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>): QueryUiState<Any>
     {
         try {
             val startTime = System.nanoTime()
@@ -31,12 +30,23 @@ class ContentResolverQuery(var isDebug: Boolean = false) {
             val finishTime = System.nanoTime()
 
             // ignore timings in debug mode, due to debug logging adding extra time
-            return QueryDisplayResult.Success(processResult(queryResult, params, if (isDebug) 0 else finishTime - startTime))
+            if (queryResult.size > 0) {
+                return QueryUiState.Success(
+                    processResult(
+                        queryResult,
+                        params,
+                        if (isDebug) 0 else finishTime - startTime
+                    )
+                )
+            }
+            else
+            {
+                return QueryUiState.Failure("No results for query")
+            }
         } catch (e: Exception)
         {
-            QueryDisplayResult.Error(e)
+            return QueryUiState.Error(e)
         }
-        return QueryDisplayResult.Error(IOException("Error in query to ContentResolver"))
     }
 
     /**

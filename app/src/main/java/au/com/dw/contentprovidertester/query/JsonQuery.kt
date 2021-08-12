@@ -3,11 +3,10 @@ package au.com.dw.contentprovidertester.query
 import android.content.Context
 import android.net.Uri
 import android.util.Log
-import au.com.dw.contentprovidertester.data.Result
 import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
-import au.com.dw.contentprovidertester.ui.QueryDisplayResult
+import au.com.dw.contentprovidertester.ui.QueryUiState
 import com.google.gson.*
 
 
@@ -43,7 +42,7 @@ open class JsonQuery(var prettyPrint: Boolean) {
 //        val query = ContentResolverQueryWithDebugLog()
         val queryResult = query.processQuery(context, params, secondaryQueries)
 
-        if (queryResult is QueryDisplayResult.Success<*>) {
+        if (queryResult is QueryUiState.Success<*>) {
 
             val resultData = queryResult.data as QueryResult
 
@@ -67,7 +66,7 @@ open class JsonQuery(var prettyPrint: Boolean) {
         jsonObject.add("Content Provider query", rootElement)
         val saved = output(gson.toJson(jsonObject))
 
-        return (queryResult is QueryDisplayResult.Success<*> && saved)
+        return (queryResult is QueryUiState.Success<*> && saved)
     }
 
     protected open fun output(json: String): Boolean {
