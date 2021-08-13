@@ -29,8 +29,9 @@ fun ResultScreen(vm: QueryViewModel)
                 )
             }
         ) { innerPadding ->
-//            val tableListsHolder = collateTableData(uiState.value.data)
-            TableScreen(Modifier.padding(innerPadding))
+            val result = (uiState.value as QueryUiState.Success<*>).data as QueryResult
+            val tableListsHolder = collateTableData(result.results)
+            TableScreen(Modifier.padding(innerPadding), tableListsHolder)
         }
     }
     else
@@ -41,8 +42,8 @@ fun ResultScreen(vm: QueryViewModel)
 }
 
 @Composable
-//fun TableScreen(modifier: Modifier = Modifier, listsHolder : TableListsHolder) {
-fun TableScreen(modifier: Modifier = Modifier) {
+fun TableScreen(modifier: Modifier = Modifier, listsHolder : TableListsHolder) {
+//fun TableScreen(modifier: Modifier = Modifier) {
 
     // Adds view to Compose
     AndroidView(
@@ -55,11 +56,14 @@ fun TableScreen(modifier: Modifier = Modifier) {
             // items MUST be added after TableView.setAdapter(), which also sets the tableview field
             // in the adapter to itself, else will get a NullPointerException
             // since setAllItems needs access to the TableView for layout sizing
-            val cells1 = listOf<Cell>(Cell("1-0", "hello"), Cell("2-0", "world"))
-            val cells2 = listOf<Cell>(Cell("1-1", "next"), Cell("2-1", "line"))
-            adapter.setAllItems(listOf(ColumnHeader("1","col1"), ColumnHeader("2","col2")),
-                listOf(RowHeader("1","1"), RowHeader("2","2")),
-                listOf(cells1, cells2))
+
+//            val cells1 = listOf<Cell>(Cell("1-0", "hello"), Cell("2-0", "world"))
+//            val cells2 = listOf<Cell>(Cell("1-1", "next"), Cell("2-1", "line"))
+//            adapter.setAllItems(listOf(ColumnHeader("1","col1"), ColumnHeader("2","col2")),
+//                listOf(RowHeader("1","1"), RowHeader("2","2")),
+//                listOf(cells1, cells2))
+
+            adapter.setAllItems(listsHolder.columnHeaders, listsHolder.rowHeaders, listsHolder.cells)
 
             tableView.tableViewListener = TableViewListener(tableView)
             tableView
@@ -72,16 +76,18 @@ fun collateTableData(data : List<Map<String, Any>>) : TableListsHolder
     var columnHeaderList = getColumnHeaderList(data)
     var rowHeaderList = getRowHeaderList(data)
 
-    var cellList : MutableList<Cell> = mutableListOf()
+    var cellListOfLists : MutableList<MutableList<Cell>> = mutableListOf()
 
     data.forEachIndexed { index, map ->
+        var cellList : MutableList<Cell> = mutableListOf()
         columnHeaderList.forEachIndexed { colIndex, col ->
             // the id for the cell is a combination of the column index and the row index
             cellList.add(Cell(colIndex.toString() + "-" + index, map.get(col.data)))
         }
+        cellListOfLists.add(cellList)
     }
 
-    return TableListsHolder(columnHeaderList.toList(),  rowHeaderList.toList(), cellList.toList())
+    return TableListsHolder(columnHeaderList.toList(),  rowHeaderList.toList(), cellListOfLists)
 }
 
 fun getColumnHeaderList(data : List<Map<String, Any>>) : List<ColumnHeader>
