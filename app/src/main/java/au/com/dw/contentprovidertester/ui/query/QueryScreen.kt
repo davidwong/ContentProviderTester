@@ -1,26 +1,41 @@
 package au.com.dw.contentprovidertester.ui.query
 
 import android.content.Context
+import android.provider.ContactsContract
+import android.provider.Telephony
 import android.util.Log
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import au.com.dw.contentprovidertester.ui.QueryUiState
 import au.com.dw.contentprovidertester.ui.QueryViewModel
 import au.com.dw.contentprovidertester.ui.navigation.Screen
+import android.provider.Telephony.Sms
+import android.provider.Telephony.Mms
+import androidx.compose.material.icons.filled.Search
+
 
 @Composable
 fun QueryScreen(vm: QueryViewModel, navController: NavController)
 {
+    /**
+     * The UI state determines what to display
+     * - on successful query, pass to result screen to show results
+     * - if there has been an error or failure (no results for the query), then show an additional
+     * snackbar message
+     */
     val uiState = vm.queryUiState.observeAsState()
+
     val scaffoldState = rememberScaffoldState()
 
     if (uiState.value is QueryUiState.Success<*>)
@@ -74,36 +89,85 @@ fun QueryScreen(vm: QueryViewModel, navController: NavController)
 fun QueryBodyContent(modifier: Modifier = Modifier, onQuery: (Context, String, String, String, String, String) -> Unit)
 {
     Column {
+        // for convenience similate a drop down list (not currently available in the compose library) for commonly
+        // used query URI's
+        var expanded by remember { mutableStateOf(false) }
+        val icon = if (expanded)
+            Icons.Filled.Search
+        else
+            Icons.Filled.ArrowDropDown
+
+        val uriLookup = mapOf("Sms.Inbox.CONTENT_URI" to Sms.Inbox.CONTENT_URI.toString(),
+            "Sms.CONTENT_URI" to Sms.CONTENT_URI.toString(),
+            "Mms.CONTENT_URI" to Mms.CONTENT_URI.toString(),
+            "ContactsContract.RawContacts.CONTENT_URI" to ContactsContract.RawContacts.CONTENT_URI.toString(),
+            "ContactsContract.Data.CONTENT_URI" to ContactsContract.Data.CONTENT_URI.toString(),
+            "StructuredPostal.CONTENT_URI" to ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI.toString())
+
+        val uriShortCuts = listOf("Sms.Inbox.CONTENT_URI",
+            "Sms.CONTENT_URI",
+            "Mms.CONTENT_URI",
+            "ContactsContract.RawContacts.CONTENT_URI",
+            "ContactsContract.Data.CONTENT_URI",
+            "StructuredPostal.CONTENT_URI")
+
         var uri by remember { mutableStateOf("") }
-        TextField(
-            value = uri,
-            onValueChange = { uri = it },
-            label = { Text("uri")}
-        )
+        Box() {
+            OutlinedTextField(
+                value = uri,
+                onValueChange = { uri = it },
+//            modifier = Modifier.fillMaxWidth(),
+                label = { Text("uri") },
+                trailingIcon = {
+                    Icon(icon, "contentDescription", Modifier.clickable { expanded = !expanded })
+                }
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // can't use map directly here as will get error message about not being inside
+                // a composable, so use a separate lookup instead
+                uriShortCuts.forEach { item ->
+                    DropdownMenuItem(onClick = {
+                        uri = uriLookup.get(item)!!
+                        expanded = false
+                    }) {
+                        Text(text = item)
+                    }
+                }
+            }
+        }
+
         var projection by remember { mutableStateOf("") }
         TextField(
             value = projection,
             onValueChange = { projection = it },
             label = { Text("projection")}
         )
+
         var selection by remember { mutableStateOf("") }
         TextField(
             value = selection,
             onValueChange = { selection = it },
             label = { Text("selection")}
         )
+
         var selectionArgs by remember { mutableStateOf("") }
         TextField(
             value = selectionArgs,
             onValueChange = { selectionArgs = it },
             label = { Text("selectionArgs")}
         )
+
         var sortOrder by remember { mutableStateOf("") }
         TextField(
             value = sortOrder,
             onValueChange = { sortOrder = it },
             label = { Text("sortOrder")}
         )
+
         Box(
             modifier = Modifier.fillMaxWidth(),
             contentAlignment = Alignment.Center)

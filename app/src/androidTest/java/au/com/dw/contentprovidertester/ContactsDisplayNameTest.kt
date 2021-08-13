@@ -149,7 +149,7 @@ class ContactsDisplayNameTest(val contactDetails: NamePhoneInput, val displayNam
             contentValues
         )
         // get the newly created contact raw id.
-        val rawContactId = ContentUris.parseId(rawContactUri)
+        val rawContactId = ContentUris.parseId(rawContactUri!!)
 
         // insert names
         insertName(contactDetails, rawContactId)

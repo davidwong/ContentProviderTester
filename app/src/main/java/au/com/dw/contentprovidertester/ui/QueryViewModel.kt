@@ -13,30 +13,12 @@ class QueryViewModel(private val loginRepository: ContentResolverQuery) : ViewMo
     private val queryResult = MutableLiveData<QueryUiState<Any>>(QueryUiState.Idle)
     val queryUiState : LiveData<QueryUiState<Any>> = queryResult
 
-    private val _name = MutableLiveData("")
-    val name: LiveData<String> = _name
-
-    // onNameChange is an event we're defining that the UI can invoke
-    // (events flow up from UI)
-    fun onNameChange(newName: String) {
-        _name.value = newName
-    }
-
     fun processQuery(context: Context, uri: String, projection: String, selection: String, selectionArgs: String, sortOrder: String) {
         // can be launched in a separate asynchronous job
         val queryParam = QueryParam(
             Uri.parse(uri), checkStringArray(projection),
             checkString(selection), checkStringArray(selectionArgs), checkString(sortOrder))
         queryResult.value = loginRepository.processQuery(context, queryParam, emptyList())
-
-        // end repo
-//        if (result is Result.Success) {
-//            queryResult.value =
-//                QueryDisplayResult(success = result.data)
-//        } else {
-//            queryResult.value =
-//                QueryDisplayResult(error = R.string.query_failed)
-//        }
     }
 
     private fun checkString(value: String): String?
@@ -55,8 +37,4 @@ class QueryViewModel(private val loginRepository: ContentResolverQuery) : ViewMo
             return null
     }
 
-    // A placeholder username validation check
-    private fun isUserNameValid(username: String): Boolean {
-        return   username.isNotBlank()
-    }
 }

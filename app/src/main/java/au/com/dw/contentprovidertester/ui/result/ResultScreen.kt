@@ -5,7 +5,6 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.viewinterop.AndroidView
 import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.ui.QueryUiState
@@ -29,6 +28,7 @@ fun ResultScreen(vm: QueryViewModel)
                 )
             }
         ) { innerPadding ->
+            // get the results to pass to the table view
             val result = (uiState.value as QueryUiState.Success<*>).data as QueryResult
             val tableListsHolder = collateTableData(result.results)
             TableScreen(Modifier.padding(innerPadding), tableListsHolder)
@@ -43,9 +43,8 @@ fun ResultScreen(vm: QueryViewModel)
 
 @Composable
 fun TableScreen(modifier: Modifier = Modifier, listsHolder : TableListsHolder) {
-//fun TableScreen(modifier: Modifier = Modifier) {
 
-    // Adds view to Compose
+    // Show the query results in a table view, as data tables are not availabe in the compose library
     AndroidView(
         modifier = Modifier.fillMaxSize(), // Occupy the max size in the Compose UI tree
         factory = { context ->
@@ -57,12 +56,6 @@ fun TableScreen(modifier: Modifier = Modifier, listsHolder : TableListsHolder) {
             // in the adapter to itself, else will get a NullPointerException
             // since setAllItems needs access to the TableView for layout sizing
 
-//            val cells1 = listOf<Cell>(Cell("1-0", "hello"), Cell("2-0", "world"))
-//            val cells2 = listOf<Cell>(Cell("1-1", "next"), Cell("2-1", "line"))
-//            adapter.setAllItems(listOf(ColumnHeader("1","col1"), ColumnHeader("2","col2")),
-//                listOf(RowHeader("1","1"), RowHeader("2","2")),
-//                listOf(cells1, cells2))
-
             adapter.setAllItems(listsHolder.columnHeaders, listsHolder.rowHeaders, listsHolder.cells)
 
             tableView.tableViewListener = TableViewListener(tableView)
@@ -71,14 +64,17 @@ fun TableScreen(modifier: Modifier = Modifier, listsHolder : TableListsHolder) {
     )
 }
 
-fun collateTableData(data : List<Map<String, Any>>) : TableListsHolder
+/**
+ * Convert the query results into the format required for the table view.
+ */
+fun collateTableData(results : List<Map<String, Any>>) : TableListsHolder
 {
-    var columnHeaderList = getColumnHeaderList(data)
-    var rowHeaderList = getRowHeaderList(data)
+    var columnHeaderList = getColumnHeaderList(results)
+    var rowHeaderList = getRowHeaderList(results)
 
     var cellListOfLists : MutableList<MutableList<Cell>> = mutableListOf()
 
-    data.forEachIndexed { index, map ->
+    results.forEachIndexed { index, map ->
         var cellList : MutableList<Cell> = mutableListOf()
         columnHeaderList.forEachIndexed { colIndex, col ->
             // the id for the cell is a combination of the column index and the row index

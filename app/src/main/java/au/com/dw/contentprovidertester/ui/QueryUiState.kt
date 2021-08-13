@@ -1,7 +1,8 @@
 package au.com.dw.contentprovidertester.ui
 
 /**
- * The query results to display to the user or error message.
+ * The states for the query screen which determines whether to display results to the user or
+ * show an error or no result message.
  */
 sealed class QueryUiState<out T : Any> {
 
@@ -11,6 +12,7 @@ sealed class QueryUiState<out T : Any> {
 
         data class Success<out T : Any>(val data: T) : QueryUiState<T>()
 
+        // A query that returns no results is considered a failure in terms of display data
         data class Failure(val message: String) : QueryUiState<Nothing>()
 
         data class Error(val exception: Exception) : QueryUiState<Nothing>()
