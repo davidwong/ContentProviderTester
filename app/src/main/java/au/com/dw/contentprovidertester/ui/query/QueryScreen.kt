@@ -22,6 +22,7 @@ import au.com.dw.contentprovidertester.ui.QueryViewModel
 import au.com.dw.contentprovidertester.ui.navigation.Screen
 import android.provider.Telephony.Sms
 import android.provider.Telephony.Mms
+import android.text.TextUtils
 import androidx.compose.material.icons.filled.Search
 import au.com.dw.contentprovidertester.query.model.QuerySampleFiller
 
@@ -90,16 +91,21 @@ fun QueryScreen(vm: QueryViewModel, navController: NavController)
 fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String, String, String, String) -> Unit)
 {
     Column {
-        // for convenience similate a drop down list (not currently available in the compose library) for commonly
-        // used query URI's
-        var expanded by remember { mutableStateOf(false) }
-        val icon = if (expanded)
-            Icons.Filled.Search
-        else
-            Icons.Filled.ArrowDropDown
+        // internal value for composable shared by uri and projection dropdown lists - when a CONTENT_URI is
+        // selected in the uri dropdown, then the dropdown list for projection is updated to the
+        // appropriate column names for that CONTENT_URI
+        var projectionLookup by remember { mutableStateOf(emptyMap<String, String>()) }
 
         var uri by remember { mutableStateOf("") }
+        // for convenience similate a drop down list (not currently available in the compose library) for commonly
+        // used query URI's
         Box() {
+            var expanded by remember { mutableStateOf(false) }
+            val icon = if (expanded)
+                Icons.Filled.Search
+            else
+                Icons.Filled.ArrowDropDown
+
             OutlinedTextField(
                 value = uri,
                 onValueChange = { uri = it },
@@ -119,6 +125,7 @@ fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySamp
                 querySampleFiller.uris.keys.forEach { item ->
                     DropdownMenuItem(onClick = {
                         uri = querySampleFiller.uris.get(item)?.first.toString()
+                        projectionLookup = querySampleFiller.uris.get(item)?.second!!
                         expanded = false
                     }) {
                         Text(text = item)
@@ -128,11 +135,39 @@ fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySamp
         }
 
         var projection by remember { mutableStateOf("") }
-        TextField(
-            value = projection,
-            onValueChange = { projection = it },
-            label = { Text("projection")}
-        )
+        Box() {
+            var expanded by remember { mutableStateOf(false) }
+            val icon = if (expanded)
+                Icons.Filled.Search
+            else
+                Icons.Filled.ArrowDropDown
+
+            OutlinedTextField(
+                value = projection,
+                onValueChange = { projection = it },
+//            modifier = Modifier.fillMaxWidth(),
+                label = { Text("projection") },
+                trailingIcon = {
+                    Icon(icon, "contentDescription", Modifier.clickable { expanded = !expanded })
+                }
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                // can't use map directly here as will get error message about not being inside
+                // a composable, so use a separate lookup instead
+                projectionLookup.keys.forEach { item ->
+                    DropdownMenuItem(onClick = {
+                        projection = addQueryColumn(projection, projectionLookup.get(item)!!)
+                        expanded = false
+                    }) {
+                        Text(text = item)
+                    }
+                }
+            }
+        }
 
         var selection by remember { mutableStateOf("") }
         TextField(
@@ -167,6 +202,16 @@ fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySamp
                 Text("Query")
             }
         }
+    }
+}
+
+fun addQueryColumn(projection : String, newValue : String): String {
+    if (TextUtils.isEmpty(projection))
+    {
+        return newValue
+    }
+    else{
+        return projection + ", " + newValue
     }
 }
 
