@@ -23,6 +23,7 @@ import au.com.dw.contentprovidertester.ui.navigation.Screen
 import android.provider.Telephony.Sms
 import android.provider.Telephony.Mms
 import androidx.compose.material.icons.filled.Search
+import au.com.dw.contentprovidertester.query.model.QuerySampleFiller
 
 
 @Composable
@@ -78,7 +79,7 @@ fun QueryScreen(vm: QueryViewModel, navController: NavController)
                 )
             }
         ) { innerPadding ->
-            QueryBodyContent(Modifier.padding(innerPadding), vm::processQuery)
+            QueryBodyContent(Modifier.padding(innerPadding), QuerySampleFiller(), vm::processQuery)
         }
 
     }
@@ -86,7 +87,7 @@ fun QueryScreen(vm: QueryViewModel, navController: NavController)
 
 
 @Composable
-fun QueryBodyContent(modifier: Modifier = Modifier, onQuery: (Context, String, String, String, String, String) -> Unit)
+fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String, String, String, String) -> Unit)
 {
     Column {
         // for convenience similate a drop down list (not currently available in the compose library) for commonly
@@ -96,20 +97,6 @@ fun QueryBodyContent(modifier: Modifier = Modifier, onQuery: (Context, String, S
             Icons.Filled.Search
         else
             Icons.Filled.ArrowDropDown
-
-        val uriLookup = mapOf("Sms.Inbox.CONTENT_URI" to Sms.Inbox.CONTENT_URI.toString(),
-            "Sms.CONTENT_URI" to Sms.CONTENT_URI.toString(),
-            "Mms.CONTENT_URI" to Mms.CONTENT_URI.toString(),
-            "ContactsContract.RawContacts.CONTENT_URI" to ContactsContract.RawContacts.CONTENT_URI.toString(),
-            "ContactsContract.Data.CONTENT_URI" to ContactsContract.Data.CONTENT_URI.toString(),
-            "StructuredPostal.CONTENT_URI" to ContactsContract.CommonDataKinds.StructuredPostal.CONTENT_URI.toString())
-
-        val uriShortCuts = listOf("Sms.Inbox.CONTENT_URI",
-            "Sms.CONTENT_URI",
-            "Mms.CONTENT_URI",
-            "ContactsContract.RawContacts.CONTENT_URI",
-            "ContactsContract.Data.CONTENT_URI",
-            "StructuredPostal.CONTENT_URI")
 
         var uri by remember { mutableStateOf("") }
         Box() {
@@ -129,9 +116,9 @@ fun QueryBodyContent(modifier: Modifier = Modifier, onQuery: (Context, String, S
             ) {
                 // can't use map directly here as will get error message about not being inside
                 // a composable, so use a separate lookup instead
-                uriShortCuts.forEach { item ->
+                querySampleFiller.uris.keys.forEach { item ->
                     DropdownMenuItem(onClick = {
-                        uri = uriLookup.get(item)!!
+                        uri = querySampleFiller.uris.get(item)?.first.toString()
                         expanded = false
                     }) {
                         Text(text = item)
