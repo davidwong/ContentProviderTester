@@ -1,31 +1,28 @@
 package au.com.dw.contentprovidertester.ui.query
 
 import android.content.Context
-import android.provider.ContactsContract
-import android.provider.Telephony
+import android.net.Uri
+import android.text.TextUtils
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
+import au.com.dw.contentprovidertester.query.model.QuerySampleFiller
 import au.com.dw.contentprovidertester.ui.QueryUiState
 import au.com.dw.contentprovidertester.ui.QueryViewModel
 import au.com.dw.contentprovidertester.ui.navigation.Screen
-import android.provider.Telephony.Sms
-import android.provider.Telephony.Mms
-import android.text.TextUtils
-import androidx.compose.material.icons.filled.Search
-import au.com.dw.contentprovidertester.query.model.QuerySampleFiller
-
 
 @Composable
 fun QueryScreen(vm: QueryViewModel, navController: NavController)
@@ -96,99 +93,30 @@ fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySamp
         // appropriate column names for that CONTENT_URI
         var projectionLookup by remember { mutableStateOf(emptyMap<String, String>()) }
 
+        // input values to make query, only uri is required and others are optional
         var uri by remember { mutableStateOf("") }
-        // for convenience similate a drop down list (not currently available in the compose library) for commonly
-        // used query URI's
-        Box() {
-            var expanded by remember { mutableStateOf(false) }
-            val icon = if (expanded)
-                Icons.Filled.Search
-            else
-                Icons.Filled.ArrowDropDown
-
-            OutlinedTextField(
-                value = uri,
-                onValueChange = { uri = it },
-//            modifier = Modifier.fillMaxWidth(),
-                label = { Text("uri") },
-                trailingIcon = {
-                    Icon(icon, "contentDescription", Modifier.clickable { expanded = !expanded })
-                }
-            )
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // can't use map directly here as will get error message about not being inside
-                // a composable, so use a separate lookup instead
-                querySampleFiller.uris.keys.forEach { item ->
-                    DropdownMenuItem(onClick = {
-                        uri = querySampleFiller.uris.get(item)?.first.toString()
-                        projectionLookup = querySampleFiller.uris.get(item)?.second!!
-                        expanded = false
-                    }) {
-                        Text(text = item)
-                    }
-                }
-            }
-        }
-
         var projection by remember { mutableStateOf("") }
-        Box() {
-            var expanded by remember { mutableStateOf(false) }
-            val icon = if (expanded)
-                Icons.Filled.Search
-            else
-                Icons.Filled.ArrowDropDown
-
-            OutlinedTextField(
-                value = projection,
-                onValueChange = { projection = it },
-//            modifier = Modifier.fillMaxWidth(),
-                label = { Text("projection") },
-                trailingIcon = {
-                    Icon(icon, "contentDescription", Modifier.clickable { expanded = !expanded })
-                }
-            )
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // can't use map directly here as will get error message about not being inside
-                // a composable, so use a separate lookup instead
-                projectionLookup.keys.forEach { item ->
-                    DropdownMenuItem(onClick = {
-                        projection = addQueryColumn(projection, projectionLookup.get(item)!!)
-                        expanded = false
-                    }) {
-                        Text(text = item)
-                    }
-                }
-            }
-        }
-
         var selection by remember { mutableStateOf("") }
-        TextField(
-            value = selection,
-            onValueChange = { selection = it },
-            label = { Text("selection")}
-        )
-
         var selectionArgs by remember { mutableStateOf("") }
-        TextField(
-            value = selectionArgs,
-            onValueChange = { selectionArgs = it },
-            label = { Text("selectionArgs")}
-        )
-
         var sortOrder by remember { mutableStateOf("") }
-        TextField(
-            value = sortOrder,
-            onValueChange = { sortOrder = it },
-            label = { Text("sortOrder")}
-        )
+
+        DropDownField(uri, { uri = it },"uri",
+            querySampleFiller.uris,
+            { key, items ->
+                val uriData = items.get(key)!! as Pair<Uri, Map<String, String>>
+                uri  = uriData.first.toString()
+                projectionLookup = uriData.second
+            })
+
+        DropDownField(projection, { projection = it },"projection",
+            projectionLookup,
+            { key, items ->
+                projection = addQueryColumn(projection, items.get(key)!! as String)
+            })
+
+        PlainField(selection, { selection = it } , "selection")
+        PlainField(selectionArgs, { selectionArgs = it } , "selectionArgs")
+        PlainField(sortOrder, { sortOrder = it } , "sortOrder")
 
         Box(
             modifier = Modifier.fillMaxWidth(),
@@ -200,6 +128,58 @@ fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySamp
             )
             {
                 Text("Query")
+            }
+        }
+    }
+}
+
+@Composable
+fun PlainField(fieldValue: String, onFieldChange: (String) -> Unit, fieldLabel: String) {
+    TextField(
+        value = fieldValue,
+        onValueChange = onFieldChange,
+        label = { Text(fieldLabel)}
+    )
+}
+
+// for convenience similate a drop down list (not currently available in the compose library) e.g. for commonly
+// used query URI's
+@Composable
+fun DropDownField(fieldValue: String,
+                  onFieldChange: (String) -> Unit,
+                  fieldLabel: String,
+                  dropDownItems: Map<String, Any>,
+                  onDropDownSelected: (String, Map<String, Any>) -> Unit) {
+    Box() {
+        var expanded by remember { mutableStateOf(false) }
+        val icon = if (expanded)
+            Icons.Filled.Search
+        else
+            Icons.Filled.ArrowDropDown
+
+        OutlinedTextField(
+            value = fieldValue,
+            onValueChange = onFieldChange,
+//            modifier = Modifier.fillMaxWidth(),
+            label = { Text(fieldLabel) },
+            trailingIcon = {
+                Icon(icon, "contentDescription", Modifier.clickable { expanded = !expanded })
+            }
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // can't use map directly here as will get error message about not being inside
+            // a composable, so use a separate lookup instead
+            dropDownItems.keys.forEach { label ->
+                DropdownMenuItem(onClick = {
+                    onDropDownSelected(label, dropDownItems)
+                    expanded = false
+                }) {
+                    Text(text = label)
+                }
             }
         }
     }
