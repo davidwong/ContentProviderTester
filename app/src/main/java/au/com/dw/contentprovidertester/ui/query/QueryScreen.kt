@@ -27,62 +27,83 @@ import au.com.dw.contentprovidertester.ui.navigation.Screen
 @Composable
 fun QueryScreen(vm: QueryViewModel, navController: NavController)
 {
+    // required for snackbars
+    val scaffoldState = rememberScaffoldState()
+
     /**
      * The UI state determines what to display
      * - on successful query, pass to result screen to show results
      * - if there has been an error or failure (no results for the query), then show an additional
      * snackbar message
      */
-    val uiState = vm.queryUiState.observeAsState()
-
-    val scaffoldState = rememberScaffoldState()
-
-    if (uiState.value is QueryUiState.Success<*>)
-    {
-        navController.navigate(Screen.Result.route)
-    }
-    else {
-        if (uiState.value is QueryUiState.Error) {
-            val error = uiState.value as QueryUiState.Error
-            Log.e("QueryScreen", "Query error", error.exception)
-
-            // `LaunchedEffect` will cancel and re-launch if
-            // `scaffoldState.snackbarHostState` changes
-            LaunchedEffect(scaffoldState.snackbarHostState) {
-                // Show snackbar using a coroutine, when the coroutine is cancelled the
-                // snackbar will automatically dismiss. This coroutine will cancel whenever
-                // `state.hasError` is false, and only start when `state.hasError` is true
-                // (due to the above if-check), or if `scaffoldState.snackbarHostState` changes.
-                scaffoldState.snackbarHostState.showSnackbar(
-                    message = "Error in query: " + error.exception.message
-                )
+    vm.queryUiState.observeAsState().value?.let { uiState ->
+        when (uiState) {
+            is QueryUiState.Loading -> showProgressIndicator(scaffoldState, vm::processQuery)
+            is QueryUiState.Success<*> -> navController.navigate(Screen.Result.route)
+            is QueryUiState.Error -> {
+                val error = uiState as QueryUiState.Error
+                ShowError(scaffoldState = scaffoldState, errorMsg = "Error in query: " + error.exception.message, logMessage = "Query error", logThrowable = error.exception)
+                showForm(scaffoldState = scaffoldState, vm::processQuery)
             }
-        } else if (uiState.value is QueryUiState.Failure) {
-            val failure = uiState.value as QueryUiState.Failure
-            Log.e("QueryScreen", "Query failure: " + failure.message)
-
-            LaunchedEffect(scaffoldState.snackbarHostState) {
-                scaffoldState.snackbarHostState.showSnackbar(
-                    message = failure.message
-                )
+            is QueryUiState.Failure -> {
+                val failure = uiState as QueryUiState.Failure
+                ShowError(scaffoldState = scaffoldState, errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null)
+                showForm(scaffoldState = scaffoldState, vm::processQuery)
             }
+            else -> showForm(scaffoldState = scaffoldState, vm::processQuery)
         }
-        Scaffold(
-            scaffoldState = scaffoldState,
-            topBar = {
-                TopAppBar(
-                    title = {
-                        Text(text = "Content Provider Query")
-                    }
-                )
-            }
-        ) { innerPadding ->
-            QueryBodyContent(Modifier.padding(innerPadding), QuerySampleFiller(), vm::processQuery)
-        }
-
     }
 }
 
+@Composable
+fun showForm(scaffoldState: ScaffoldState, onQuery: (Context, String, String, String, String, String) -> Unit)
+{
+    Scaffold(
+        scaffoldState = scaffoldState,
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(text = "Content Provider Query")
+                }
+            )
+        }
+    ) { innerPadding ->
+        QueryBodyContent(Modifier.padding(innerPadding), QuerySampleFiller(), onQuery)
+    }
+}
+
+@Composable
+fun showProgressIndicator(scaffoldState: ScaffoldState, onQuery: (Context, String, String, String, String, String) -> Unit)
+{
+    Box() {
+        showForm(scaffoldState, onQuery)
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+fun ShowError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: String?, logThrowable: Throwable?)
+{
+    if (null == logThrowable)
+    {
+        Log.e("QueryScreen", logMessage!!)
+    }
+    else {
+        Log.e("QueryScreen", logMessage, logThrowable)
+    }
+
+    // `LaunchedEffect` will cancel and re-launch if
+    // `scaffoldState.snackbarHostState` changes
+    LaunchedEffect(scaffoldState.snackbarHostState) {
+        // Show snackbar using a coroutine, when the coroutine is cancelled the
+        // snackbar will automatically dismiss. This coroutine will cancel whenever
+        // `state.hasError` is false, and only start when `state.hasError` is true
+        // (due to the above if-check), or if `scaffoldState.snackbarHostState` changes.
+        scaffoldState.snackbarHostState.showSnackbar(
+            message = "Error in query: " + errorMsg
+        )
+    }
+}
 
 @Composable
 fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String, String, String, String) -> Unit)
@@ -144,6 +165,12 @@ fun PlainField(fieldValue: String, onFieldChange: (String) -> Unit, fieldLabel: 
 
 // for convenience similate a drop down list (not currently available in the compose library) e.g. for commonly
 // used query URI's
+
+/**
+ * The first 3 parameters are for the text field (same as for PlainText) and the drop down parameters
+ * are for the dropdown list with a map of the labels to display and the values to use when an item
+ * from the list is selected.
+ */
 @Composable
 fun DropDownField(fieldValue: String,
                   onFieldChange: (String) -> Unit,
@@ -185,6 +212,9 @@ fun DropDownField(fieldValue: String,
     }
 }
 
+/**
+ * For use in fields where we want to add an item to the field, instead of replacing it.
+ */
 fun addQueryColumn(projection : String, newValue : String): String {
     if (TextUtils.isEmpty(projection))
     {
