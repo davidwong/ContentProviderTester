@@ -10,13 +10,15 @@ import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
 import au.com.dw.contentprovidertester.ui.QueryUiState
 import java.io.IOException
+import javax.inject.Inject
 
 /**
  * Generic utility for querying content provider using ContentResolver.query().
  * Subclass to handle what to do with the query results.
  */
-class ContentResolverQuery(var isDebug: Boolean = false) {
+class ContentResolverQuery @Inject constructor() {
 
+    var isDebug: Boolean = false
     val debugTag = "QueryDebug"
 
     /**

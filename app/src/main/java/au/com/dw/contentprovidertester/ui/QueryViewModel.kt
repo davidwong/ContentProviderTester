@@ -6,12 +6,19 @@ import android.os.Handler
 import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import au.com.dw.contentprovidertester.query.ContentResolverQuery
 import au.com.dw.contentprovidertester.query.model.QueryParam
-import java.util.*
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class QueryViewModel(private val loginRepository: ContentResolverQuery) : ViewModel() {
+@HiltViewModel
+//class QueryViewModel(private val loginRepository: ContentResolverQuery) : ViewModel() {
+class QueryViewModel @Inject constructor(
+    private val savedStateHandle: SavedStateHandle,
+    private val contentResolverQuery: ContentResolverQuery
+    ) : ViewModel() {
 
     private val queryResult = MutableLiveData<QueryUiState<Any>>(QueryUiState.Idle)
     val queryUiState : LiveData<QueryUiState<Any>> = queryResult
@@ -24,7 +31,7 @@ class QueryViewModel(private val loginRepository: ContentResolverQuery) : ViewMo
                 Uri.parse(uri), checkStringArray(projection),
                 checkString(selection), checkStringArray(selectionArgs), checkString(sortOrder)
             )
-            queryResult.value = loginRepository.processQuery(context, queryParam, emptyList())
+            queryResult.value = contentResolverQuery.processQuery(context, queryParam, emptyList())
         }, 3000)
         // can be launched in a separate asynchronous job
 //        val queryParam = QueryParam(
