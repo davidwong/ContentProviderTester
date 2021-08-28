@@ -18,17 +18,35 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import au.com.dw.contentprovidertester.query.model.QuerySampleFiller
 import au.com.dw.contentprovidertester.ui.QueryUiState
 import au.com.dw.contentprovidertester.ui.QueryViewModel
+import au.com.dw.contentprovidertester.ui.escapeUriString
 import au.com.dw.contentprovidertester.ui.navigation.Screen
 
+/**
+ * The query form screen is currently a dumb form which passes the form data to the result screen
+ * where the actually content provider query is performed.
+ *
+ * Alternative design would be to do the query when the query button is clicked, and then check the
+ * UI state, i.e.
+ * - if query is successful, then navigate to the result screen with the result data
+ * - else show error message in snackbar
+ * Unfortunately couldn't get that to work in compose.
+ *
+ * Another possibility is to do the query when the query button is clicked, and navigate from the
+ * viewmodel. Not sure whether navigating in the viewmodel would be good design, as may mean navigation
+ * is spread across viewmodels and composables.
+ */
 @Composable
-fun QueryScreen(vm: QueryViewModel, navController: NavController)
+fun QueryScreen(onQuery: (String, String?, String?, String?, String?) -> Unit)
 {
     // required for snackbars
-    val scaffoldState = rememberScaffoldState()
+//    val scaffoldState = rememberScaffoldState()
 
     /**
      * The UI state determines what to display
@@ -36,30 +54,31 @@ fun QueryScreen(vm: QueryViewModel, navController: NavController)
      * - if there has been an error or failure (no results for the query), then show an additional
      * snackbar message
      */
-    vm.queryUiState.observeAsState().value?.let { uiState ->
-        when (uiState) {
-            is QueryUiState.Loading -> showProgressIndicator(scaffoldState, vm::processQuery)
-            is QueryUiState.Success<*> -> navController.navigate(Screen.Result.route)
-            is QueryUiState.Error -> {
-                val error = uiState as QueryUiState.Error
-                ShowError(scaffoldState = scaffoldState, errorMsg = "Error in query: " + error.exception.message, logMessage = "Query error", logThrowable = error.exception)
-                showForm(scaffoldState = scaffoldState, vm::processQuery)
-            }
-            is QueryUiState.Failure -> {
-                val failure = uiState as QueryUiState.Failure
-                ShowError(scaffoldState = scaffoldState, errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null)
-                showForm(scaffoldState = scaffoldState, vm::processQuery)
-            }
-            else -> showForm(scaffoldState = scaffoldState, vm::processQuery)
-        }
-    }
+//    vm.queryUiState.observeAsState().value?.let { uiState ->
+//        when (uiState) {
+//            is QueryUiState.Loading -> showProgressIndicator(scaffoldState, vm::processQuery)
+//            is QueryUiState.Success<*> -> navController.navigate(Screen.Result.route)
+//            is QueryUiState.Error -> {
+//                val error = uiState as QueryUiState.Error
+//                ShowError(scaffoldState = scaffoldState, errorMsg = "Error in query: " + error.exception.message, logMessage = "Query error", logThrowable = error.exception)
+//                showForm(scaffoldState = scaffoldState, vm::processQuery)
+//            }
+//            is QueryUiState.Failure -> {
+//                val failure = uiState as QueryUiState.Failure
+//                ShowError(scaffoldState = scaffoldState, errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null)
+//                showForm(scaffoldState = scaffoldState, vm::processQuery)
+//            }
+//            else -> showForm(scaffoldState = scaffoldState, onQuery)
+//        }
+//    }
+
+    showForm(onQuery)
 }
 
 @Composable
-fun showForm(scaffoldState: ScaffoldState, onQuery: (Context, String, String, String, String, String) -> Unit)
+fun showForm(onQuery: (String, String?, String?, String?, String?) -> Unit)
 {
     Scaffold(
-        scaffoldState = scaffoldState,
         topBar = {
             TopAppBar(
                 title = {
@@ -72,41 +91,41 @@ fun showForm(scaffoldState: ScaffoldState, onQuery: (Context, String, String, St
     }
 }
 
-@Composable
-fun showProgressIndicator(scaffoldState: ScaffoldState, onQuery: (Context, String, String, String, String, String) -> Unit)
-{
-    Box() {
-        showForm(scaffoldState, onQuery)
-        CircularProgressIndicator()
-    }
-}
+//@Composable
+//fun showProgressIndicator(scaffoldState: ScaffoldState, onQuery: () -> Unit)
+//{
+//    Box() {
+//        showForm(scaffoldState, onQuery)
+//        CircularProgressIndicator()
+//    }
+//}
+//
+//@Composable
+//fun ShowError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: String?, logThrowable: Throwable?)
+//{
+//    if (null == logThrowable)
+//    {
+//        Log.e("QueryScreen", logMessage!!)
+//    }
+//    else {
+//        Log.e("QueryScreen", logMessage, logThrowable)
+//    }
+//
+//    // `LaunchedEffect` will cancel and re-launch if
+//    // `scaffoldState.snackbarHostState` changes
+//    LaunchedEffect(scaffoldState.snackbarHostState) {
+//        // Show snackbar using a coroutine, when the coroutine is cancelled the
+//        // snackbar will automatically dismiss. This coroutine will cancel whenever
+//        // `state.hasError` is false, and only start when `state.hasError` is true
+//        // (due to the above if-check), or if `scaffoldState.snackbarHostState` changes.
+//        scaffoldState.snackbarHostState.showSnackbar(
+//            message = "Error in query: " + errorMsg
+//        )
+//    }
+//}
 
 @Composable
-fun ShowError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: String?, logThrowable: Throwable?)
-{
-    if (null == logThrowable)
-    {
-        Log.e("QueryScreen", logMessage!!)
-    }
-    else {
-        Log.e("QueryScreen", logMessage, logThrowable)
-    }
-
-    // `LaunchedEffect` will cancel and re-launch if
-    // `scaffoldState.snackbarHostState` changes
-    LaunchedEffect(scaffoldState.snackbarHostState) {
-        // Show snackbar using a coroutine, when the coroutine is cancelled the
-        // snackbar will automatically dismiss. This coroutine will cancel whenever
-        // `state.hasError` is false, and only start when `state.hasError` is true
-        // (due to the above if-check), or if `scaffoldState.snackbarHostState` changes.
-        scaffoldState.snackbarHostState.showSnackbar(
-            message = "Error in query: " + errorMsg
-        )
-    }
-}
-
-@Composable
-fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String, String, String, String) -> Unit)
+fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySampleFiller, onQuery: (String, String?, String?, String?, String?) -> Unit)
 {
     Column {
         // internal value for composable shared by uri and projection dropdown lists - when a CONTENT_URI is
@@ -145,7 +164,13 @@ fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySamp
         {
             val context = LocalContext.current
             Button(
-                onClick = { onQuery(context, uri, projection, selection, selectionArgs, sortOrder) }
+                // would ideally like to run the query on the vm, and then have the vm set success/error state
+                // that would navigate to results screen on success or bring up snackbar message on
+                // error, but can't get it to work - another alternative is to navigate in the vm
+                // on a successful query but not sure if that is good practice, e.g.
+                // https://medium.com/google-developer-experts/modular-navigation-with-jetpack-compose-fda9f6b2bef7
+                // https://funkymuse.dev/posts/compose_hilt_mm/
+                onClick = { onQuery(escapeUriString(uri), projection, selection, selectionArgs, sortOrder) }
             )
             {
                 Text("Query")
@@ -225,8 +250,8 @@ fun addQueryColumn(projection : String, newValue : String): String {
     }
 }
 
-//@Preview
-//@Composable
-//fun PreviewQueryScreen() {
-//    QueryScreen()
-//}
+@Preview
+@Composable
+fun PreviewQueryScreen() {
+    QueryScreen({ s: String, s1: String?, s2: String?, s3: String?, s4: String? -> })
+}

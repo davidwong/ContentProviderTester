@@ -11,20 +11,12 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-//    private lateinit var queryViewModel: QueryViewModel
-    private val queryViewModel: QueryViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-//        queryViewModel = ViewModelProvider(this, QueryViewModelFactory())
-//            .get(QueryViewModel::class.java)
-
-
         setContent {
-        val queryResult2 = queryViewModel.queryUiState.observeAsState()
-
-            AppNavigation( queryViewModel )
+            AppNavigation()
         }
     }
 }
