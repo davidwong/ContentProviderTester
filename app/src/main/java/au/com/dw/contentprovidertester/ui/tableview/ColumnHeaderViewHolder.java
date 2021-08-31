@@ -78,8 +78,8 @@ public class ColumnHeaderViewHolder extends AbstractSorterViewHolder {
         // Then you should consider the below lines. Otherwise, you can remove them.
 
         // It is necessary to remeasure itself.
-        column_header_container.getLayoutParams().width = LinearLayout.LayoutParams.WRAP_CONTENT;
-        column_header_textview.requestLayout();
+//        column_header_container.getLayoutParams().width = LinearLayout.LayoutParams.WRAP_CONTENT;
+//        column_header_textview.requestLayout();
     }
 
     @NonNull

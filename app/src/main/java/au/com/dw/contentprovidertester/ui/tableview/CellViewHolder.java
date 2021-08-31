@@ -58,7 +58,7 @@ public class CellViewHolder extends AbstractViewHolder {
         // Then you should consider the below lines. Otherwise, you can ignore them.
 
         // It is necessary to remeasure itself.
-        cell_container.getLayoutParams().width = LinearLayout.LayoutParams.WRAP_CONTENT;
-        cell_textview.requestLayout();
+//        cell_container.getLayoutParams().width = LinearLayout.LayoutParams.WRAP_CONTENT;
+//        cell_textview.requestLayout();
     }
 }

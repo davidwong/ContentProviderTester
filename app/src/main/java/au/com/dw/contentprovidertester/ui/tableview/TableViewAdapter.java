@@ -106,7 +106,7 @@ public class TableViewAdapter extends AbstractTableAdapter<ColumnHeader, RowHead
                 // Get the holder to update cell item text
                 CellViewHolder viewHolder = (CellViewHolder) holder;
                 viewHolder.setCell(cellItemModel);
-
+        // DEPRECATED: done in CellViewHolder
         // If your TableView should have auto resize for cells & columns.
         // Then you should consider the below lines. Otherwise, you can ignore them.
 
@@ -160,6 +160,7 @@ public class TableViewAdapter extends AbstractTableAdapter<ColumnHeader, RowHead
         ColumnHeaderViewHolder columnHeaderViewHolder = (ColumnHeaderViewHolder) holder;
         columnHeaderViewHolder.setColumnHeader(columnHeaderItemModel);
 
+        // DEPRECATED done in ColumnHeaderViewHolder
         // If your TableView should have auto resize for cells & columns.
         // Then you should consider the below lines. Otherwise, you can ignore them.
 

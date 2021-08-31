@@ -1,6 +1,7 @@
 package au.com.dw.contentprovidertester.ui.result
 
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.runtime.*
@@ -9,41 +10,42 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.ui.QueryUiState
 import au.com.dw.contentprovidertester.ui.QueryViewModel
 import au.com.dw.contentprovidertester.ui.navigation.QueryHolder
-import au.com.dw.contentprovidertester.ui.query.showForm
 import au.com.dw.contentprovidertester.ui.tableview.*
 import com.evrencoskun.tableview.CellAllowClick
 import com.evrencoskun.tableview.MyTableView
 
 @Composable
-fun ResultScreen(queryHolder: QueryHolder, vm: QueryViewModel = hiltViewModel())
+fun TestScreen(vm: QueryViewModel = hiltViewModel())
 {
-//    val uiState = vm.queryUiState.observeAsState()
-//
-//    if (uiState.value is QueryUiState.Success<*>) {
-//        Scaffold(
-//            topBar = {
-//                TopAppBar(
-//                    title = {
-//                        Text(text = "Query Results")
-//                    }
-//                )
-//            }
-//        ) { innerPadding ->
-//            // get the results to pass to the table view
-//            val result = (uiState.value as QueryUiState.Success<*>).data as QueryResult
-//            val tableListsHolder = collateTableData(result.results)
-//            TableScreen(Modifier.padding(innerPadding), tableListsHolder)
-//        }
-//    }
+    vm.reset()
+    Text("hello6")
+}
 
+@Composable
+fun ResultScreen1(vm: QueryViewModel, onBack: () -> Unit)
+{
+    val uiState = vm.queryUiState.observeAsState()
+
+    if (uiState.value is QueryUiState.Success<*>) {
+        val result = (uiState.value as QueryUiState.Success<*>).data as QueryResult
+        TableScreen(result, onBack)
+    }
+    else
+    {
+        // this shouldn't happen as successful query should have already been checked
+        Text("Unable to display results")
+    }
+}
+
+@Composable
+fun ResultScreen2(queryHolder: QueryHolder, vm: QueryViewModel = hiltViewModel())
+{
     val context = LocalContext.current
-//    vm.processQuery(context, "content://sms/inbox", "", "", "", "")
     vm.processQuery(context, queryHolder.uri, queryHolder.projection, queryHolder.selection, queryHolder.selectionArgs, queryHolder.sortOrder)
     /**
      * The UI state determines what to display
@@ -54,7 +56,7 @@ fun ResultScreen(queryHolder: QueryHolder, vm: QueryViewModel = hiltViewModel())
     vm.queryUiState.observeAsState().value?.let { uiState ->
         when (uiState) {
             is QueryUiState.Loading -> showProgressIndicator()
-            is QueryUiState.Success<*> -> TableScreen((uiState as QueryUiState.Success<*>).data as QueryResult)
+            is QueryUiState.Success<*> -> TableScreen((uiState as QueryUiState.Success<*>).data as QueryResult, null)
             is QueryUiState.Error -> {
                 val error = uiState as QueryUiState.Error
                 ShowError(errorMsg = "Error in query: " + error.exception.message, logMessage = "Query error", logThrowable = error.exception)
@@ -65,11 +67,11 @@ fun ResultScreen(queryHolder: QueryHolder, vm: QueryViewModel = hiltViewModel())
             }
         }
     }
-
 }
 
 @Composable
-fun TableScreen(queryResult: QueryResult) {
+fun TableScreen(queryResult: QueryResult, onBack: (() -> Unit)?) {
+        onBack?.let { BackHandler(onBack = onBack) }
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -80,7 +82,6 @@ fun TableScreen(queryResult: QueryResult) {
             }
         ) { innerPadding ->
             // get the results to pass to the table view
-//            val result = (uiState.value as QueryUiState.Success<*>).data as QueryResult
             val tableListsHolder = collateTableData(queryResult.results)
             TableContent(Modifier.padding(innerPadding), queryResult, tableListsHolder)
         }

@@ -20,6 +20,11 @@ class QueryViewModel @Inject constructor(
     private val queryResult = MutableLiveData<QueryUiState<Any>>(QueryUiState.Idle)
     val queryUiState : LiveData<QueryUiState<Any>> = queryResult
 
+    fun test()
+    {
+        queryResult.value = QueryUiState.Test
+    }
+
     fun processQuery(context: Context, uri: String, projection: String?, selection: String?, selectionArgs: String?, sortOrder: String?) {
         queryResult.value = QueryUiState.Loading
 
@@ -41,4 +46,8 @@ class QueryViewModel @Inject constructor(
         queryResult.value = contentResolverQuery.processQuery(context, queryParam, emptyList())
     }
 
+    fun reset()
+    {
+        queryResult.value = QueryUiState.Idle
+    }
 }
