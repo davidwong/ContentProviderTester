@@ -3,8 +3,7 @@ package au.com.dw.contentprovidertester.ui.result
 import au.com.dw.contentprovidertester.ui.tableview.Cell
 import au.com.dw.contentprovidertester.ui.tableview.ColumnHeader
 import au.com.dw.contentprovidertester.ui.tableview.RowHeader
-import org.junit.jupiter.api.Assertions.*
-
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class ResultScreenTest {

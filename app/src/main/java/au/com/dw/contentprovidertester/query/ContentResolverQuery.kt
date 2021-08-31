@@ -9,7 +9,6 @@ import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
 import au.com.dw.contentprovidertester.ui.QueryUiState
-import java.io.IOException
 import javax.inject.Inject
 
 /**

@@ -31,7 +31,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.evrencoskun.tableview.MyTableView;
-import com.evrencoskun.tableview.TableView;
 import com.evrencoskun.tableview.listener.ITableViewListener;
 
 import au.com.dw.contentprovidertester.ui.tableview.popup.ColumnHeaderLongPressPopup;

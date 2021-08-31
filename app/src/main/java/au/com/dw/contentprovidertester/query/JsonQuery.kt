@@ -7,7 +7,10 @@ import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.query.model.QueryParam
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
 import au.com.dw.contentprovidertester.ui.QueryUiState
-import com.google.gson.*
+import com.google.gson.ExclusionStrategy
+import com.google.gson.FieldAttributes
+import com.google.gson.GsonBuilder
+import com.google.gson.JsonObject
 
 
 /**

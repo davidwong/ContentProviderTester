@@ -32,7 +32,6 @@ import android.widget.PopupMenu;
 import androidx.annotation.NonNull;
 
 import com.evrencoskun.tableview.MyTableView;
-import com.evrencoskun.tableview.TableView;
 import com.evrencoskun.tableview.sort.SortState;
 
 import au.com.dw.contentprovidertester.R;

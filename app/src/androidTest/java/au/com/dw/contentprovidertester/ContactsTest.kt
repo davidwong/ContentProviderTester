@@ -1,7 +1,6 @@
 package au.com.dw.contentprovidertester
 
 import android.Manifest
-import android.R.attr.phoneNumber
 import android.content.Context
 import android.net.Uri
 import android.provider.ContactsContract
@@ -9,7 +8,6 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import au.com.dw.contentprovidertester.query.JsonQuery
 import au.com.dw.contentprovidertester.query.model.QueryParam
-import org.junit.Assert
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Before

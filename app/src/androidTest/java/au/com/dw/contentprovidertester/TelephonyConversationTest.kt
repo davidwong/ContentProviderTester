@@ -4,11 +4,7 @@ import android.Manifest
 import android.content.Context
 import android.net.Uri
 import android.provider.ContactsContract
-import android.provider.Telephony.Sms
-import android.provider.Telephony.Mms
-import android.provider.Telephony.MmsSms
-import android.provider.Telephony.Threads
-import android.provider.Telephony.ThreadsColumns
+import android.provider.Telephony.*
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
 import au.com.dw.contentprovidertester.query.JsonFileQuery

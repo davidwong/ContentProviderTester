@@ -9,7 +9,6 @@ import au.com.dw.contentprovidertester.ui.QueryViewModel
 import au.com.dw.contentprovidertester.ui.query.QueryScreen1
 import au.com.dw.contentprovidertester.ui.result.ResultScreen1
 import au.com.dw.contentprovidertester.ui.result.ResultScreen2
-import au.com.dw.contentprovidertester.ui.result.TestScreen
 import au.com.dw.contentprovidertester.ui.unEscapeUriString
 
 @Composable
@@ -29,6 +28,7 @@ fun AppNavigation() {
         }
         composable(route = Screen.Result1.route) {
             ResultScreen1(vm) {
+                // reset UI state to clear data if go back to query screen for another query
                 vm.reset()
                 navController.navigateUp()
             }
@@ -42,18 +42,13 @@ fun AppNavigation() {
             val sortOrder = backStackEntry.arguments?.getString("sortOrder")
             // unescaping URI may not actually be necessary, as seems to be done already
             val queryHolder = QueryHolder(unEscapeUriString(uri), projection, selection, selectionArgs, sortOrder)
-            ResultScreen2(queryHolder)
-        }
-        composable(Screen.Test.route)
-        {
-            TestScreen()
+            ResultScreen2(queryHolder){ navController.navigateUp() }
         }
     }
 }
 
 sealed class Screen(val route: String) {
     object Query: Screen("query")
-    object Test: Screen("test")
     object Result1: Screen("result1")
     object Result2: Screen("result2{uri}?projection={projection}&selection={selection}&selectionArgs={selectionArgs}&sortOrder={sortOrder}") {
         fun routeWithParams(uri: String,

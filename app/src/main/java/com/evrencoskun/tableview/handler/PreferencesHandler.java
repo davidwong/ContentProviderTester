@@ -27,7 +27,6 @@ package com.evrencoskun.tableview.handler;
 import androidx.annotation.NonNull;
 
 import com.evrencoskun.tableview.MyTableView;
-import com.evrencoskun.tableview.TableView;
 import com.evrencoskun.tableview.preference.Preferences;
 
 /**

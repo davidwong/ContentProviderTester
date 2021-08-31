@@ -1,20 +1,16 @@
 package au.com.dw.contentprovidertester
 
 import android.Manifest
-import android.R.id
 import android.content.*
 import android.database.Cursor
 import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.ContactsContract.CommonDataKinds.Phone
 import android.provider.ContactsContract.CommonDataKinds.StructuredPostal
-import android.telephony.PhoneNumberUtils
-import android.util.Log
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.rule.GrantPermissionRule
-import au.com.dw.contentprovidertester.query.JsonQuery
-import au.com.dw.contentprovidertester.query.model.QueryParam
-import org.junit.Assert.*
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test

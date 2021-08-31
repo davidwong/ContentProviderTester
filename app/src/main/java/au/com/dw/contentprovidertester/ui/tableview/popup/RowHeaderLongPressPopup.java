@@ -33,7 +33,6 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.evrencoskun.tableview.MyTableView;
-import com.evrencoskun.tableview.TableView;
 
 import au.com.dw.contentprovidertester.R;
 

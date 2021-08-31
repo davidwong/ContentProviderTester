@@ -69,10 +69,7 @@ fun QueryScreen1(vm: QueryViewModel, navController: NavController)
             is QueryUiState.Success<*> -> {
 
                 LaunchedEffect(uiState == QueryUiState.Test) {
-
                     navController.navigate(Screen.Result1.route)
-                    // reset ui state to idle in case return to this screen from back press
-//                    vm.reset()
                 }
 
             }
