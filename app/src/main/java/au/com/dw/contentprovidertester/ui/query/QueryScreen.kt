@@ -23,6 +23,7 @@ import androidx.navigation.NavController
 import au.com.dw.contentprovidertester.query.model.QuerySampleFiller
 import au.com.dw.contentprovidertester.ui.QueryUiState
 import au.com.dw.contentprovidertester.ui.QueryViewModel
+import au.com.dw.contentprovidertester.ui.escapeUriString
 import au.com.dw.contentprovidertester.ui.navigation.Screen
 
 /**
@@ -32,11 +33,13 @@ import au.com.dw.contentprovidertester.ui.navigation.Screen
  * Do the query when the query button is clicked, and then check the UI state, i.e.
  * - if query is successful, then navigate to the result screen with the result data
  * - else show error message in snackbar
- * This means navigating in a LaunchedEffect and also resetting the UI state to idle afterwards.
+ * This means navigating in a LaunchedEffect and also resetting the UI state to idle after the
+ * results have been displayed, e.g. on back press.
  *
  * 2.
  * The query form screen is a dumb form which passes the form input data to the result screen
- * where the actually content provider query is performed.
+ * where the actually content provider query is performed. This is simpler but means any errors
+ * will require the user to manually go back to the query form to try again.
  *
  * Note:
  * Another possibility is to do the query when the query button is clicked, and navigate from the
@@ -50,10 +53,8 @@ import au.com.dw.contentprovidertester.ui.navigation.Screen
  * Query screen for design 1.
  */
 @Composable
-fun QueryScreen1(vm: QueryViewModel, navController: NavController)
+fun QueryScreen(vm: QueryViewModel, navController: NavController)
 {
-    // attempt 1
-
     // required for snackbars
     val scaffoldState = rememberScaffoldState()
 
@@ -67,44 +68,34 @@ fun QueryScreen1(vm: QueryViewModel, navController: NavController)
         when (uiState) {
             is QueryUiState.Loading -> showProgressIndicator(scaffoldState, vm::processQuery)
             is QueryUiState.Success<*> -> {
-
+                // navigate to the results screen, instead of trying to pass the results as a complex
+                // parameter the result screen should share the viewmodel and access the result
+                // data from it
                 LaunchedEffect(uiState == QueryUiState.Test) {
-                    navController.navigate(Screen.Result1.route)
+                    navController.navigate(Screen.Result.route)
                 }
 
             }
             is QueryUiState.Error -> {
                 val error = uiState as QueryUiState.Error
                 ShowError(scaffoldState = scaffoldState, errorMsg = "Error in query: " + error.exception.message, logMessage = "Query error", logThrowable = error.exception)
-                showForm(scaffoldState = scaffoldState, vm::processQuery, null)
+                showForm(scaffoldState = scaffoldState, vm::processQuery)
             }
             is QueryUiState.Failure -> {
                 val failure = uiState as QueryUiState.Failure
                 ShowError(scaffoldState = scaffoldState, errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null)
-                showForm(scaffoldState = scaffoldState, vm::processQuery, null)
+                showForm(scaffoldState = scaffoldState, vm::processQuery)
             }
-            else -> showForm(scaffoldState = scaffoldState, vm::processQuery, null)
+            else -> showForm(scaffoldState = scaffoldState, vm::processQuery)
         }
     }
-}
-
-/**
- * Query screen for design 2.
- */
-@Composable
-fun QueryScreen2(onQuery2: (String, String?, String?, String?, String?) -> Unit)
-{
-    // scaffoldState not used and only one of the query lambda's is used, only put in to satisfy function signature
-    val scaffoldState = rememberScaffoldState()
-    val vm: QueryViewModel = hiltViewModel()
-    showForm(scaffoldState, null, onQuery2)
 }
 
 /**
  * Only need either query1 or query2 lambda for navigation depending on design alternative.
  */
 @Composable
-fun showForm(scaffoldState: ScaffoldState, onQuery1: ((Context, String, String?, String?, String?, String?) -> Unit)?, onQuery2: ((String, String?, String?, String?, String?) -> Unit)?)
+fun showForm(scaffoldState: ScaffoldState, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
 {
     Scaffold(
         scaffoldState = scaffoldState,
@@ -116,16 +107,16 @@ fun showForm(scaffoldState: ScaffoldState, onQuery1: ((Context, String, String?,
             )
         }
     ) { innerPadding ->
-        QueryBodyContent(Modifier.padding(innerPadding), QuerySampleFiller(), onQuery1, onQuery2)
+        QueryBodyContent(Modifier.padding(innerPadding), QuerySampleFiller(), onQuery)
     }
 }
 
 @Composable
-fun showProgressIndicator(scaffoldState: ScaffoldState, onQuery1: (Context, String, String?, String?, String?, String?) -> Unit)
+fun showProgressIndicator(scaffoldState: ScaffoldState, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
 {
     Box() {
         // show form first so that the progress bar appears above it
-        showForm(scaffoldState, onQuery1, null)
+        showForm(scaffoldState, onQuery)
         CircularProgressIndicator()
     }
 }
@@ -154,11 +145,8 @@ fun ShowError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: String
     }
 }
 
-/**
- * Only need either query1 or query2 lambda for navigation depending on design alternative.
- */
 @Composable
-fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySampleFiller, onQuery1: ((Context, String, String?, String?, String?, String?) -> Unit)?, onQuery2: ((String, String?, String?, String?, String?) -> Unit)?)
+fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
 {
     Column {
         // internal value for composable shared by uri and projection dropdown lists - when a CONTENT_URI is
@@ -197,13 +185,8 @@ fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySamp
         {
             val context = LocalContext.current
             Button(
-                // design 1
                 // invoke the query on the viewmodel
-                onClick = { onQuery1?.let { it(context, uri, projection, selection, selectionArgs, sortOrder) } }
-
-                // design 2
-                // pass on input params to the results screen
-//                onClick = { onQuery2?.let { it(escapeUriString(uri), projection, selection, selectionArgs, sortOrder) } }
+                onClick = { onQuery(context, uri, projection, selection, selectionArgs, sortOrder) }
             )
             {
                 Text("Query")
