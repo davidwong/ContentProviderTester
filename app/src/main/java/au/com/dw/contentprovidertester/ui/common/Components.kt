@@ -2,15 +2,18 @@ package au.com.dw.contentprovidertester.ui.common
 
 import android.text.TextUtils
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun PlainField(fieldValue: String, onFieldChange: (String) -> Unit, fieldLabel: String) {
@@ -34,7 +37,8 @@ fun DropDownField(fieldValue: String,
                   onFieldChange: (String) -> Unit,
                   fieldLabel: String,
                   dropDownItems: Map<String, Any>,
-                  onDropDownSelected: (String, Map<String, Any>) -> Unit) {
+                  onDropDownSelected: (String, Map<String, Any>) -> Unit
+                    ) {
     Box() {
         var expanded by remember { mutableStateOf(false) }
         val icon = if (expanded)
@@ -50,6 +54,69 @@ fun DropDownField(fieldValue: String,
             trailingIcon = {
                 Icon(icon, "contentDescription", Modifier.clickable { expanded = !expanded })
             }
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            // can't use map directly here as will get error message about not being inside
+            // a composable, so use a separate lookup instead
+            dropDownItems.keys.forEach { label ->
+                DropdownMenuItem(onClick = {
+                    onDropDownSelected(label, dropDownItems)
+                    expanded = false
+                }) {
+                    Text(text = label)
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Dropdown for text fields which require validation. The actual validation is done in the
+ * TextFieldState passed, which contains both the field and the validation code.
+ */
+@Composable
+fun DropDownValidatingField(validationState: TextFieldState,
+                            fieldLabel: String,
+                            imeAction: ImeAction = ImeAction.Next,
+                            onImeAction: () -> Unit = {},
+                            dropDownItems: Map<String, Any>,
+                            onDropDownSelected: (String, Map<String, Any>) -> Unit
+) {
+    Box() {
+        var expanded by remember { mutableStateOf(false) }
+        val icon = if (expanded)
+            Icons.Filled.Search
+        else
+            Icons.Filled.ArrowDropDown
+
+        OutlinedTextField(
+            value = validationState.text,
+            onValueChange = { validationState.text = it },
+            modifier = Modifier
+//                .fillMaxWidth()
+                .onFocusChanged { focusState ->
+                    validationState.onFocusChange(focusState.isFocused)
+                    if (!focusState.isFocused) {
+                        validationState.enableShowErrors()
+                    }
+                },
+            label = { Text(fieldLabel) },
+            // can't use trailing icon for error, as already used for dropdown icon
+            trailingIcon = {
+                Icon(icon, "contentDescription", Modifier.clickable { expanded = !expanded })
+            },
+            isError = validationState.showErrors(),
+            keyboardOptions = KeyboardOptions.Default.copy(imeAction = imeAction),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    onImeAction()
+                }
+            )
         )
         DropdownMenu(
             expanded = expanded,
@@ -67,6 +134,25 @@ fun DropDownField(fieldValue: String,
                 }
             }
         }
+    }
+    // needs to be outside box scope to show below text input
+    validationState.getError()?.let { errorMsg ->
+        TextFieldError(textError = errorMsg)
+    }
+}
+
+/**
+ * To be removed when [TextField]s support error
+ */
+@Composable
+fun TextFieldError(textError: String) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = textError,
+            modifier = Modifier.fillMaxWidth(),
+            style = LocalTextStyle.current.copy(color = MaterialTheme.colors.error)
+        )
     }
 }
 

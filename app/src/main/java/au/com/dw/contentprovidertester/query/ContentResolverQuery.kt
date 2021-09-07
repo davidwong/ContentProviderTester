@@ -22,6 +22,9 @@ class ContentResolverQuery @Inject constructor() {
 
     /**
      * This the entry into the query process.
+     *
+     * Should really be using QueryUiState here since that is used to drive the view.
+     * Ideally would have another query result type that is translated to QueryUiState in the viewmodel.
      */
     fun processQuery(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>): QueryUiState<Any>
     {
@@ -42,11 +45,11 @@ class ContentResolverQuery @Inject constructor() {
             }
             else
             {
-                return QueryUiState.Failure("No results for query")
+                return QueryUiState.Failure("No results for query " + params.uri.toString())
             }
         } catch (e: Exception)
         {
-            return QueryUiState.Error(e)
+            return QueryUiState.Error("Query error for query "+ params.uri.toString(), e)
         }
     }
 

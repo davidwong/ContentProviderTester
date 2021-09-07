@@ -5,14 +5,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.hilt.navigation.compose.hiltViewModel
 import au.com.dw.contentprovidertester.query.model.QuerySampleFiller
-import au.com.dw.contentprovidertester.ui.QueryViewModel
+import au.com.dw.contentprovidertester.ui.common.DropDownField
+import au.com.dw.contentprovidertester.ui.common.PlainField
 import au.com.dw.contentprovidertester.ui.escapeUriString
 
 /**
@@ -40,6 +42,7 @@ import au.com.dw.contentprovidertester.ui.escapeUriString
 
 /**
  * Query screen for design 2.
+ * Note that field validation has not yet been added for this design.
  */
 @Composable
 fun QueryFormOnlyScreen(onQuery: (String, String?, String?, String?, String?) -> Unit)
@@ -47,9 +50,6 @@ fun QueryFormOnlyScreen(onQuery: (String, String?, String?, String?, String?) ->
     showForm2(onQuery)
 }
 
-/**
- * Only need either query1 or query2 lambda for navigation depending on design alternative.
- */
 @Composable
 fun showForm2(onQuery: (String, String?, String?, String?, String?) -> Unit)
 {
@@ -66,9 +66,6 @@ fun showForm2(onQuery: (String, String?, String?, String?, String?) -> Unit)
     }
 }
 
-/**
- * Only need either query1 or query2 lambda for navigation depending on design alternative.
- */
 @Composable
 fun QueryBodyContent2(modifier: Modifier = Modifier, querySampleFiller: QuerySampleFiller, onQuery: (String, String?, String?, String?, String?) -> Unit)
 {
