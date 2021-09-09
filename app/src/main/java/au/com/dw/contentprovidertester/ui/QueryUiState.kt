@@ -8,8 +8,6 @@ sealed class QueryUiState<out T : Any> {
 
         object Idle : QueryUiState<Nothing>()
 
-        object Test : QueryUiState<Nothing>()
-
         object Loading : QueryUiState<Nothing>()
 
         data class Success<out T : Any>(val data: T) : QueryUiState<T>()
@@ -22,7 +20,6 @@ sealed class QueryUiState<out T : Any> {
         override fun toString(): String {
                 return when (this) {
                         is Idle -> "Idle"
-                        is Test -> "Test"
                         is Loading -> "Loading"
                         is Success<*> -> "Success[data=$data]"
                         is Failure -> "Failure[message=$message]"

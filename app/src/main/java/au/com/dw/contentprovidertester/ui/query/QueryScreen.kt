@@ -72,7 +72,7 @@ fun QueryScreen(vm: QueryViewModel, navController: NavController)
                 // navigate to the results screen, instead of trying to pass the results as a complex
                 // parameter the result screen should share the viewmodel and access the result
                 // data from it
-                LaunchedEffect(uiState == QueryUiState.Test) {
+                LaunchedEffect(Unit) {
                     navController.navigate(Screen.Result.route)
                 }
 
