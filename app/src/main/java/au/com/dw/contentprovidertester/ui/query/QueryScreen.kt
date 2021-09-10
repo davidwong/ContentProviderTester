@@ -15,8 +15,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import au.com.dw.contentprovidertester.R
 import au.com.dw.contentprovidertester.query.model.QuerySampleFiller
 import au.com.dw.contentprovidertester.ui.QueryUiState
 import au.com.dw.contentprovidertester.ui.QueryViewModel
@@ -54,10 +58,12 @@ import au.com.dw.contentprovidertester.util.LogCompositions
  * Query screen for design 1.
  */
 @Composable
-fun QueryScreen(vm: QueryViewModel, navController: NavController)
+fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
 {
     // required for snackbars
     val scaffoldState = rememberScaffoldState()
+
+    val querySampleFiller = QuerySampleFiller()
 
     /**
      * The UI state determines what to display
@@ -67,7 +73,7 @@ fun QueryScreen(vm: QueryViewModel, navController: NavController)
      */
     vm.queryUiState.observeAsState().value?.let { uiState ->
         when (uiState) {
-            is QueryUiState.Loading -> showProgressIndicator(scaffoldState, vm::processQuery)
+            is QueryUiState.Loading -> ProgressIndicator(scaffoldState, querySampleFiller, vm::processQuery)
             is QueryUiState.Success<*> -> {
                 // navigate to the results screen, instead of trying to pass the results as a complex
                 // parameter the result screen should share the viewmodel and access the result
@@ -79,15 +85,15 @@ fun QueryScreen(vm: QueryViewModel, navController: NavController)
             }
             is QueryUiState.Error -> {
                 val error = uiState as QueryUiState.Error
-                ShowError(scaffoldState = scaffoldState, errorMsg = error.message + ": " + error.exception.message, logMessage = "Query error", logThrowable = error.exception)
-                showForm(scaffoldState = scaffoldState, vm::processQuery)
+                QueryError(scaffoldState = scaffoldState, errorMsg = error.message + ": " + error.exception.message, logMessage = "Query error", logThrowable = error.exception)
+                QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
             }
             is QueryUiState.Failure -> {
                 val failure = uiState as QueryUiState.Failure
-                ShowError(scaffoldState = scaffoldState, errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null)
-                showForm(scaffoldState = scaffoldState, vm::processQuery)
+                QueryError(scaffoldState = scaffoldState, errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null)
+                QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
             }
-            else -> showForm(scaffoldState = scaffoldState, vm::processQuery)
+            else -> QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
         }
     }
 }
@@ -96,7 +102,7 @@ fun QueryScreen(vm: QueryViewModel, navController: NavController)
  * Only need either query1 or query2 lambda for navigation depending on design alternative.
  */
 @Composable
-fun showForm(scaffoldState: ScaffoldState, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
+fun QueryScreen(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
 {
     LogCompositions("showForm")
     Scaffold(
@@ -109,23 +115,23 @@ fun showForm(scaffoldState: ScaffoldState, onQuery: (Context, String, String?, S
             )
         }
     ) { innerPadding ->
-        QueryBodyContent(Modifier.padding(innerPadding), QuerySampleFiller(), onQuery)
+        QueryBodyContent(Modifier.padding(innerPadding), querySampleFiller, onQuery)
     }
 }
 
 @Composable
-fun showProgressIndicator(scaffoldState: ScaffoldState, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
+fun ProgressIndicator(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
 {
     LogCompositions("showProgress")
     Box() {
         // show form first so that the progress bar appears above it
-        showForm(scaffoldState, onQuery)
+        QueryScreen(scaffoldState, querySampleFiller, onQuery)
         CircularProgressIndicator()
     }
 }
 
 @Composable
-fun ShowError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: String?, logThrowable: Throwable?)
+fun QueryError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: String?, logThrowable: Throwable?)
 {
     LogCompositions("showError")
     if (null == logThrowable)
@@ -196,6 +202,7 @@ fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySamp
         {
             val context = LocalContext.current
             Button(
+                modifier = Modifier.padding(dimensionResource(id = R.dimen.buttonPadding)),
                 // invoke the query on the viewmodel
                 onClick = { onQuery(context, uri.text, projection, selection, selectionArgs, sortOrder) },
                 enabled = uri.isValid
@@ -220,8 +227,11 @@ fun addQueryColumn(projection : String, newValue : String): String {
     }
 }
 
-//@Preview
-//@Composable
-//fun PreviewQueryScreen() {
-//    QueryScreen({ s: String, s1: String?, s2: String?, s3: String?, s4: String? -> })
-//}
+@Preview
+@Composable
+fun PreviewQueryScreen() {
+    val querySampleFiller = QuerySampleFiller()
+
+    QueryScreen(rememberScaffoldState(), querySampleFiller) { c, s1, s2, s3, s4, s5 -> Unit }
+}
+

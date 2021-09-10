@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="buttonPadding">16dp</dimen>
+    <dimen name="textHorizPadding">10dp</dimen>
+    <dimen name="textVertPadding">4dp</dimen>
+</resources>

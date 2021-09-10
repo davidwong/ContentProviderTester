@@ -23,12 +23,6 @@ fun ResultScreen(vm: QueryViewModel, onBack: () -> Unit)
         val result = (uiState.value as QueryUiState.Success<*>).data as QueryResult
         TableScreen(result, onBack)
     }
-    else
-    {
-        // this shouldn't happen as successful query should have already been checked for
-        // before coming to this screen
-        Text("Unable to display results")
-    }
 }
 
 @Composable

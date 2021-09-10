@@ -8,7 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import au.com.dw.contentprovidertester.theme.AppTheme
 import au.com.dw.contentprovidertester.ui.QueryViewModel
 import au.com.dw.contentprovidertester.ui.query.QueryFormOnlyScreen
-import au.com.dw.contentprovidertester.ui.query.QueryScreen
+import au.com.dw.contentprovidertester.ui.query.QueryScreenHandler
 import au.com.dw.contentprovidertester.ui.result.ResultScreen
 import au.com.dw.contentprovidertester.ui.result.ResultScreenInvokeQuery
 import au.com.dw.contentprovidertester.ui.unEscapeUriString
@@ -21,7 +21,7 @@ fun AppNavigation() {
         // choose Query or QueryFormOnly as start destination
         NavHost(navController, startDestination = Screen.Query.route) {
             composable(route = Screen.Query.route) {
-                QueryScreen(vm, navController)
+                QueryScreenHandler(vm, navController)
             }
             composable(route = Screen.Result.route) {
                 ResultScreen(vm) {

@@ -12,12 +12,15 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import au.com.dw.contentprovidertester.R
 
 @Composable
 fun PlainField(fieldValue: String, onFieldChange: (String) -> Unit, fieldLabel: String) {
     TextField(
+        modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.textHorizPadding), vertical = dimensionResource(id = R.dimen.textVertPadding)),
         value = fieldValue,
         onValueChange = onFieldChange,
         label = { Text(fieldLabel) }
@@ -39,7 +42,9 @@ fun DropDownField(fieldValue: String,
                   dropDownItems: Map<String, Any>,
                   onDropDownSelected: (String, Map<String, Any>) -> Unit
                     ) {
-    Box() {
+    Box(
+        modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.textHorizPadding), vertical = dimensionResource(id = R.dimen.textVertPadding))
+        ) {
         var expanded by remember { mutableStateOf(false) }
         val icon = if (expanded)
             Icons.Filled.Search
@@ -87,7 +92,9 @@ fun DropDownValidatingField(validationState: TextFieldState,
                             dropDownItems: Map<String, Any>,
                             onDropDownSelected: (String, Map<String, Any>) -> Unit
 ) {
-    Box() {
+    Box(
+        modifier = Modifier.padding(horizontal = dimensionResource(id = R.dimen.textHorizPadding), vertical = dimensionResource(id = R.dimen.textVertPadding))
+        ) {
         var expanded by remember { mutableStateOf(false) }
         val icon = if (expanded)
             Icons.Filled.Search
