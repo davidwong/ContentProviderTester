@@ -15,8 +15,8 @@ This is meant to be used as a quick way to check that a query works. For more ex
 
 Currently the app has permissions for READ\_CONTACTS and READ\_SMS set in the manifest. If you need any addition permissions for accessing the content providers that you want, then please add them and rebuild the app:
 
-* Add the permission(s) to the manifest.
-* For runtime permissions, add them to the methodRequiresPermissions() method in the MainActivity.
+* Add the required permission(s) to the manifest for the content providers that you intend to query.
+* ***IMPORTANT:*** The UI has been converted to use compose and currently does not handle granting runtime permissions. Either allow the permissions manually in app settings or install via adb with the -g option.
 
 #### Limitations
 
