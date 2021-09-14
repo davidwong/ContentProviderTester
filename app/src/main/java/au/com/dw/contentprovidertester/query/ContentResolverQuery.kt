@@ -24,7 +24,8 @@ class ContentResolverQuery @Inject constructor() {
      * This the entry into the query process.
      *
      * Should really be using QueryUiState here since that is used to drive the view.
-     * Ideally would have another query result type that is translated to QueryUiState in the viewmodel.
+     * Ideally would have another query result type for back end requests that is translated to
+     * QueryUiState in the viewmodel to drive the view.
      */
     fun processQuery(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>): QueryUiState<Any>
     {

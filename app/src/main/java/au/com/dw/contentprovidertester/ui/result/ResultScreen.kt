@@ -25,6 +25,9 @@ fun ResultScreen(vm: QueryViewModel, onBack: () -> Unit)
     }
 }
 
+/**
+ * DEPRECATED - only kept as backup
+ */
 @Composable
 fun ResultScreenInvokeQuery(queryHolder: QueryHolder, vm: QueryViewModel = hiltViewModel(), onBack: () -> Unit)
 {
@@ -52,6 +55,9 @@ fun ResultScreenInvokeQuery(queryHolder: QueryHolder, vm: QueryViewModel = hiltV
     }
 }
 
+/**
+ * todo - center the progress bar
+ */
 @Composable
 fun showProgressIndicator()
 {

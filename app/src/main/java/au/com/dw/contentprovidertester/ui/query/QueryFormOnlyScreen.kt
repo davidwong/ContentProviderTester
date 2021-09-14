@@ -41,6 +41,8 @@ import au.com.dw.contentprovidertester.ui.escapeUriString
  */
 
 /**
+ * DEPRECATED - only kept as backup in case design 1 has major issues.
+ *
  * Query screen for design 2.
  * Note that field validation has not yet been added for this design.
  */

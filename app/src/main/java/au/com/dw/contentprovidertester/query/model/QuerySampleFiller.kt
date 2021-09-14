@@ -4,8 +4,22 @@ import android.net.Uri
 import android.provider.ContactsContract
 import android.provider.Telephony
 
+/**
+ * Sample content provider URI's and commonly used columns for those URI's to fill dropdown lists
+ * for the query form.
+ *
+ * The first list contains some commonly used URI's as input for the URI field.
+ * e.g.
+ * The list may contain the item 'Sms.Inbox.CONTENT_URI' which, when selected, puts the URI string
+ * 'content://sms/inbox' into the URI field.
+ *
+ * When an URI has been selected for the first list, then the second list is used to populate the
+ * projection dropdown with commonly used column names for that URI.
+ * e.g.
+ * If the 'Sms.Inbox.CONTENT_URI' was selected from the first list, then columns such as 'address',
+ * 'body', etc from the second list should be available.
+ */
 class QuerySampleFiller {
-
 
     // lists of potential column names for projections and sort order
 

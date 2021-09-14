@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import au.com.dw.contentprovidertester.R
 import au.com.dw.contentprovidertester.query.model.QuerySampleFiller
@@ -119,6 +118,9 @@ fun QueryScreen(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFill
     }
 }
 
+/**
+ * todo - center the progress bar
+ */
 @Composable
 fun ProgressIndicator(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
 {

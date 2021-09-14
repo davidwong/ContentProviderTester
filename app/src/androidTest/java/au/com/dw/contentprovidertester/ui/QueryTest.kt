@@ -3,7 +3,6 @@ package au.com.dw.contentprovidertester.ui
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.ui.test.*
 import au.com.dw.contentprovidertester.query.model.QuerySampleFiller
-import au.com.dw.contentprovidertester.ui.query.QueryBodyContent
 import au.com.dw.contentprovidertester.ui.query.QueryScreen
 import de.mannodermaus.junit5.compose.createComposeExtension
 import org.junit.jupiter.api.Test
