@@ -39,6 +39,7 @@ fun PlainField(fieldValue: String, onFieldChange: (String) -> Unit, fieldLabel: 
 fun DropDownField(fieldValue: String,
                   onFieldChange: (String) -> Unit,
                   fieldLabel: String,
+                  dropDownIconDescription: String,
                   dropDownItems: Map<String, Any>,
                   onDropDownSelected: (String, Map<String, Any>) -> Unit
                     ) {
@@ -57,7 +58,7 @@ fun DropDownField(fieldValue: String,
 //            modifier = Modifier.fillMaxWidth(),
             label = { Text(fieldLabel) },
             trailingIcon = {
-                Icon(icon, "contentDescription", Modifier.clickable { expanded = !expanded })
+                Icon(icon, dropDownIconDescription, Modifier.clickable { expanded = !expanded })
             }
         )
 
@@ -89,6 +90,7 @@ fun DropDownValidatingField(validationState: TextFieldState,
                             fieldLabel: String,
                             imeAction: ImeAction = ImeAction.Next,
                             onImeAction: () -> Unit = {},
+                            dropDownIconDescription: String,
                             dropDownItems: Map<String, Any>,
                             onDropDownSelected: (String, Map<String, Any>) -> Unit
 ) {
@@ -115,7 +117,7 @@ fun DropDownValidatingField(validationState: TextFieldState,
             label = { Text(fieldLabel) },
             // can't use trailing icon for error, as already used for dropdown icon
             trailingIcon = {
-                Icon(icon, "contentDescription", Modifier.clickable { expanded = !expanded })
+                Icon(icon, dropDownIconDescription, Modifier.clickable { expanded = !expanded })
             },
             isError = validationState.showErrors(),
             keyboardOptions = KeyboardOptions.Default.copy(imeAction = imeAction),

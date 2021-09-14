@@ -179,6 +179,7 @@ fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySamp
             "uri *",
             ImeAction.Next,
             { projectionFocusRequest.requestFocus() },
+            "uri dropdown",
             querySampleFiller.uris,
             { key, items ->
                 val uriData = items.get(key)!! as Pair<Uri, Map<String, String>>
@@ -186,7 +187,9 @@ fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySamp
                 projectionLookup = uriData.second
             })
 
-        DropDownField(projection, { projection = it },"projection",
+        DropDownField(projection, { projection = it },
+            "projection",
+            "projection dropdown",
             projectionLookup,
             { key, items ->
                 projection = addQueryColumn(projection, items.get(key)!! as String)

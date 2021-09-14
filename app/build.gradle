@@ -88,6 +88,8 @@ dependencies {
     androidTestImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
     androidTestImplementation 'de.mannodermaus.junit5:android-test-core:1.2.2'
     androidTestRuntimeOnly 'de.mannodermaus.junit5:android-test-runner:1.2.2'
+    androidTestImplementation "androidx.compose.ui:ui-test-junit4:$COMPOSE_VERSION"
+    debugImplementation "androidx.compose.ui:ui-test-manifest:$COMPOSE_VERSION"
     androidTestImplementation 'de.mannodermaus.junit5:android-test-compose:0.1.0-SNAPSHOT'
 
     androidTestImplementation 'androidx.test.ext:junit:1.1.3'

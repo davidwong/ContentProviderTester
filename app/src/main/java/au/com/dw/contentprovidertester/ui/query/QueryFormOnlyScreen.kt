@@ -82,7 +82,10 @@ fun QueryBodyContent2(modifier: Modifier = Modifier, querySampleFiller: QuerySam
         var selectionArgs by remember { mutableStateOf("") }
         var sortOrder by remember { mutableStateOf("") }
 
-        DropDownField(uri, { uri = it },"uri",
+        DropDownField(uri,
+            { uri = it },
+            "uri",
+            "uri dropdown",
             querySampleFiller.uris,
             { key, items ->
                 val uriData = items.get(key)!! as Pair<Uri, Map<String, String>>
@@ -90,7 +93,10 @@ fun QueryBodyContent2(modifier: Modifier = Modifier, querySampleFiller: QuerySam
                 projectionLookup = uriData.second
             })
 
-        DropDownField(projection, { projection = it },"projection",
+        DropDownField(projection,
+            { projection = it },
+            "projection",
+            "projection dropdown",
             projectionLookup,
             { key, items ->
                 projection = addQueryColumn(projection, items.get(key)!! as String)
