@@ -26,14 +26,17 @@ class QueryViewModel @Inject constructor(
         // for testing progress bar
 //        Handler(Looper.getMainLooper()).postDelayed({
 //            val queryParam = QueryParam(
-//                Uri.parse(uri), checkStringArray(projection),
-//                checkString(selection), checkStringArray(selectionArgs), checkString(sortOrder)
+//                Uri.parse(uri), checkQueryStringArray(projection),
+//                checkQueryString(selection), checkQueryStringArray(selectionArgs), checkQueryString(sortOrder)
 //            )
 //            queryResult.value = contentResolverQuery.processQuery(context, queryParam, emptyList())
 //        }, 3000)
 
         // can also be launched in a separate asynchronous job
-        val unescapedUri = unEscapeUriString(uri)
+
+        // only needed if URI string was escaped before this function was invoked
+//        val unescapedUri = unEscapeUriString(uri)
+
         val queryParam = QueryParam(
             Uri.parse(uri), checkQueryStringArray(projection),
             checkQueryString(selection), checkQueryStringArray(selectionArgs), checkQueryString(sortOrder)

@@ -1,7 +1,6 @@
 package au.com.dw.contentprovidertester.ui.result
 
 import android.util.Log
-import androidx.compose.foundation.layout.Box
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -12,6 +11,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.ui.QueryUiState
 import au.com.dw.contentprovidertester.ui.QueryViewModel
+import au.com.dw.contentprovidertester.ui.common.ProgressIndicator
 import au.com.dw.contentprovidertester.ui.navigation.QueryHolder
 
 @Composable
@@ -41,7 +41,7 @@ fun ResultScreenInvokeQuery(queryHolder: QueryHolder, vm: QueryViewModel = hiltV
      */
     vm.queryUiState.observeAsState().value?.let { uiState ->
         when (uiState) {
-            is QueryUiState.Loading -> showProgressIndicator()
+            is QueryUiState.Loading -> ProgressIndicator()
             is QueryUiState.Success<*> -> TableScreen((uiState as QueryUiState.Success<*>).data as QueryResult, onBack)
             is QueryUiState.Error -> {
                 val error = uiState as QueryUiState.Error
@@ -52,17 +52,6 @@ fun ResultScreenInvokeQuery(queryHolder: QueryHolder, vm: QueryViewModel = hiltV
                 ShowError(errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null, onBack = onBack)
             }
         }
-    }
-}
-
-/**
- * todo - center the progress bar
- */
-@Composable
-fun showProgressIndicator()
-{
-    Box() {
-        CircularProgressIndicator()
     }
 }
 

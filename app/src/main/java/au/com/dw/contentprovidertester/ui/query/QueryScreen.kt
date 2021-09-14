@@ -23,10 +23,7 @@ import au.com.dw.contentprovidertester.R
 import au.com.dw.contentprovidertester.query.model.QuerySampleFiller
 import au.com.dw.contentprovidertester.ui.QueryUiState
 import au.com.dw.contentprovidertester.ui.QueryViewModel
-import au.com.dw.contentprovidertester.ui.common.DropDownField
-import au.com.dw.contentprovidertester.ui.common.DropDownValidatingField
-import au.com.dw.contentprovidertester.ui.common.PlainField
-import au.com.dw.contentprovidertester.ui.common.TextNotEmptyState
+import au.com.dw.contentprovidertester.ui.common.*
 import au.com.dw.contentprovidertester.ui.navigation.Screen
 import au.com.dw.contentprovidertester.util.LogCompositions
 
@@ -72,7 +69,7 @@ fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
      */
     vm.queryUiState.observeAsState().value?.let { uiState ->
         when (uiState) {
-            is QueryUiState.Loading -> ProgressIndicator(scaffoldState, querySampleFiller, vm::processQuery)
+            is QueryUiState.Loading -> LoadingIndicator(scaffoldState, querySampleFiller, vm::processQuery)
             is QueryUiState.Success<*> -> {
                 // navigate to the results screen, instead of trying to pass the results as a complex
                 // parameter the result screen should share the viewmodel and access the result
@@ -118,17 +115,14 @@ fun QueryScreen(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFill
     }
 }
 
-/**
- * todo - center the progress bar
- */
 @Composable
-fun ProgressIndicator(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
+fun LoadingIndicator(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
 {
     LogCompositions("showProgress")
-    Box() {
+    Box {
         // show form first so that the progress bar appears above it
         QueryScreen(scaffoldState, querySampleFiller, onQuery)
-        CircularProgressIndicator()
+        ProgressIndicator()
     }
 }
 

@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.res.dimensionResource
@@ -64,8 +65,7 @@ fun DropDownField(fieldValue: String,
 
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth()
+            onDismissRequest = { expanded = false }
         ) {
             // can't use map directly here as will get error message about not being inside
             // a composable, so use a separate lookup instead
@@ -129,8 +129,7 @@ fun DropDownValidatingField(validationState: TextFieldState,
         )
         DropdownMenu(
             expanded = expanded,
-            onDismissRequest = { expanded = false },
-            modifier = Modifier.fillMaxWidth()
+            onDismissRequest = { expanded = false }
         ) {
             // can't use map directly here as will get error message about not being inside
             // a composable, so use a separate lookup instead
@@ -175,5 +174,15 @@ fun addQueryColumn(projection : String, newValue : String): String {
     }
     else{
         return projection + ", " + newValue
+    }
+}
+
+@Composable
+fun ProgressIndicator()
+{
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier.fillMaxSize() ){
+        CircularProgressIndicator()
     }
 }
