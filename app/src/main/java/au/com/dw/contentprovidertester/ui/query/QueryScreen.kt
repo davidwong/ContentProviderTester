@@ -7,6 +7,7 @@ import android.text.TextUtils
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -116,22 +117,14 @@ fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
             Button(
                 modifier = Modifier.padding(dimensionResource(id = R.dimen.buttonPadding)),
                 // invoke the query on the viewmodel
-                onClick = { vm.processQuery(context, uri.text, projection, selection, selectionArgs, sortOrder) }
-//                onClick = { onQuery(context, uri.text, projection, selection, selectionArgs, sortOrder) }
-//                enabled = uri.isValid
+                onClick = { vm.processQuery(context, uri.text, projection, selection, selectionArgs, sortOrder) },
+                enabled = uri.isValid
             )
             {
                 Text("Query")
             }
         }
     }
-
-    val isTwoColumnMode = (LocalConfiguration.current.orientation
-            == Configuration.ORIENTATION_LANDSCAPE)
-    if (isTwoColumnMode)
-        Log.d("orientation", "landscape")
-    else
-        Log.d("orientation", "portrait")
 
     /**
      * The UI state determines what to display
@@ -141,7 +134,14 @@ fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
      */
     vm.queryUiState.observeAsState().value?.let { uiState ->
         when (uiState) {
-//            is QueryUiState.Loading -> LoadingIndicator(scaffoldState, querySampleFiller, vm::processQuery)
+            is QueryUiState.Loading -> {
+                Box {
+                    LogCompositions("showProgress")
+                    // show form first so that the progress bar appears above it
+                    QueryScreen(scaffoldState,  uriField, projectionField, selectionField, selectionArgsField, sortOrderField, queryButton)
+                    ProgressIndicator()
+                }
+            }
             is QueryUiState.Success<*> -> {
                 // navigate to the results screen, instead of trying to pass the results as a complex
                 // parameter the result screen should share the viewmodel and access the result
@@ -154,12 +154,12 @@ fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
             is QueryUiState.Error -> {
                 val error = uiState as QueryUiState.Error
                 QueryError(scaffoldState = scaffoldState, errorMsg = error.message + ": " + error.exception.message, logMessage = "Query error", logThrowable = error.exception, vm::reset)
-//                QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
+                QueryScreen(scaffoldState,  uriField, projectionField, selectionField, selectionArgsField, sortOrderField, queryButton)
             }
             is QueryUiState.Failure -> {
                 val failure = uiState as QueryUiState.Failure
                 QueryError(scaffoldState = scaffoldState, errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null, vm::reset)
-//                QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
+                QueryScreen(scaffoldState,  uriField, projectionField, selectionField, selectionArgsField, sortOrderField, queryButton)
             }
             else -> QueryScreen(scaffoldState,  uriField, projectionField, selectionField, selectionArgsField, sortOrderField, queryButton)
         }
@@ -189,8 +189,6 @@ fun QueryScreen(scaffoldState: ScaffoldState,
             )
         }
     ) { innerPadding ->
-        // validation errors
-        val projectionFocusRequest = remember { FocusRequester() }
 
         QueryBodyContent(Modifier.padding(innerPadding),
             uriField,
@@ -201,17 +199,6 @@ fun QueryScreen(scaffoldState: ScaffoldState,
             queryButton)
     }
 }
-
-//@Composable
-//fun LoadingIndicator(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
-//{
-//    LogCompositions("showProgress")
-//    Box {
-//        // show form first so that the progress bar appears above it
-//        QueryScreen(scaffoldState, querySampleFiller, onQuery)
-//        ProgressIndicator()
-//    }
-//}
 
 /**
  * Show snackbar when there has been a query error or the query has no results to show.
@@ -264,14 +251,31 @@ fun QueryBodyContent(modifier: Modifier = Modifier,
                      selectionArgsField: @Composable () -> Unit,
                      sortOrderField: @Composable () -> Unit,
                      queryButton: @Composable () -> Unit) {
-    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
-        uriField()
-        projectinField()
-        selectionField()
-        selectionArgsField()
-        sortOrderField()
-        queryButton()
-    }
+    val isLandscape = (LocalConfiguration.current.orientation == Configuration.ORIENTATION_LANDSCAPE)
+    if (isLandscape)
+        Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+            Row(modifier = modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1.0f)) {
+                    uriField()
+                    projectinField()
+                }
+                Column(modifier = Modifier.weight(1.0f)) {
+                    selectionField()
+                    selectionArgsField()
+                    sortOrderField()
+                }
+            }
+            queryButton()
+        }
+    else
+        Column(modifier = modifier.verticalScroll(rememberScrollState())) {
+            uriField()
+            projectinField()
+            selectionField()
+            selectionArgsField()
+            sortOrderField()
+            queryButton()
+        }
 }
 
 /**
