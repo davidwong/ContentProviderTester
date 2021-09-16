@@ -1,6 +1,7 @@
 package au.com.dw.contentprovidertester.ui.query
 
 import android.content.Context
+import android.content.res.Configuration
 import android.net.Uri
 import android.text.TextUtils
 import android.util.Log
@@ -8,12 +9,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.text.input.ImeAction
@@ -61,6 +66,13 @@ fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
 
     val querySampleFiller = QuerySampleFiller()
 
+    val isTwoColumnMode = (LocalConfiguration.current.orientation
+            == Configuration.ORIENTATION_LANDSCAPE)
+    if (isTwoColumnMode)
+        Log.d("orientation", "landscape")
+    else
+        Log.d("orientation", "portrait")
+
     /**
      * The UI state determines what to display
      * - on successful query, pass to result screen to show results
@@ -81,12 +93,12 @@ fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
             }
             is QueryUiState.Error -> {
                 val error = uiState as QueryUiState.Error
-                QueryError(scaffoldState = scaffoldState, errorMsg = error.message + ": " + error.exception.message, logMessage = "Query error", logThrowable = error.exception)
+                QueryError(scaffoldState = scaffoldState, errorMsg = error.message + ": " + error.exception.message, logMessage = "Query error", logThrowable = error.exception, vm::reset)
                 QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
             }
             is QueryUiState.Failure -> {
                 val failure = uiState as QueryUiState.Failure
-                QueryError(scaffoldState = scaffoldState, errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null)
+                QueryError(scaffoldState = scaffoldState, errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null, vm::reset)
                 QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
             }
             else -> QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
@@ -126,8 +138,19 @@ fun LoadingIndicator(scaffoldState: ScaffoldState, querySampleFiller: QuerySampl
     }
 }
 
+/**
+ * Show snackbar when there has been a query error or the query has no results to show.
+ *
+ * todo: 2 problems
+ * 1. After the snackbar is shown, if the same error or failure occurs again (with the same error
+ * message) then the snackbar doesn't show again.
+ * 2. On orientation change when the snackbar has already show, the snackbar will popup again since
+ * the UI state is still set to error or failure. Tried resetting UI state to idle after the snackbar
+ * is dismissed, but then the whole form is refreshed and the URI field is wiped
+ *
+ */
 @Composable
-fun QueryError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: String?, logThrowable: Throwable?)
+fun QueryError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: String?, logThrowable: Throwable?, onDismiss: () -> Unit)
 {
     LogCompositions("showError")
     if (null == logThrowable)
@@ -146,27 +169,33 @@ fun QueryError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: Strin
         // can't use LogCompositions here since it is only allowed inside composable function
         Log.d("Compositions: ", "snackbar")
 
-        scaffoldState.snackbarHostState.showSnackbar(
+        val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
             message = "Error in query: " + errorMsg
         )
+//        if (snackbarResult == SnackbarResult.Dismissed)
+//        {
+//            Log.d("Compositions: ", "snackbar dismissed")
+//            onDismiss.invoke()
+//        }
+
     }
 }
 
 @Composable
 fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
 {
-    Column {
+    Column(modifier = modifier.verticalScroll(rememberScrollState())) {
         // internal value for composable shared by uri and projection dropdown lists - when a CONTENT_URI is
         // selected in the uri dropdown, then the dropdown list for projection is updated to the
         // appropriate column names for that CONTENT_URI
-        var projectionLookup by remember { mutableStateOf(emptyMap<String, String>()) }
+        var projectionLookup by rememberSaveable { mutableStateOf(emptyMap<String, String>()) }
 
         // input values to make query, only uri is required and others are optional
-        var uri = remember { TextNotEmptyState() }
-        var projection by remember { mutableStateOf("") }
-        var selection by remember { mutableStateOf("") }
-        var selectionArgs by remember { mutableStateOf("") }
-        var sortOrder by remember { mutableStateOf("") }
+        var uri = rememberSaveable { TextNotEmptyState() }
+        var projection by rememberSaveable { mutableStateOf("") }
+        var selection by rememberSaveable { mutableStateOf("") }
+        var selectionArgs by rememberSaveable { mutableStateOf("") }
+        var sortOrder by rememberSaveable { mutableStateOf("") }
 
         // validation errors
         val projectionFocusRequest = remember { FocusRequester() }

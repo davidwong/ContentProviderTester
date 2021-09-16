@@ -16,14 +16,17 @@
 
 package au.com.dw.contentprovidertester.ui.common
 
+import android.os.Parcelable
 import android.text.TextUtils
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import kotlinx.parcelize.Parcelize
 
 /**
  * TextFieldState for fields that should not be empty.
  */
+@Parcelize
 class TextNotEmptyState : TextFieldState(validator = ::isValid, errorFor = ::validationError)
 
 /**
@@ -40,10 +43,12 @@ private fun isValid(value: String): Boolean {
 /**
  * Copied from compose samples JetSurvey.
  */
+@Parcelize
 open class TextFieldState(
     private val validator: (String) -> Boolean = { true },
     private val errorFor: (String) -> String = { "" }
-) {
+) : Parcelable
+{
     var text: String by mutableStateOf("")
     // was the TextField ever focused
     var isFocusedDirty: Boolean by mutableStateOf(false)

@@ -33,13 +33,14 @@ import com.evrencoskun.tableview.preference.Preferences;
  * Created by evrencoskun on 3.03.2018.
  */
 
-public class PreferencesHandler {
+
+public class MyPreferencesHandler {
     @NonNull
     private final ScrollHandler scrollHandler;
     @NonNull
     private final SelectionHandler selectionHandler;
 
-    public PreferencesHandler(@NonNull MyTableView tableView) {
+    public MyPreferencesHandler(@NonNull MyTableView tableView) {
         this.scrollHandler = tableView.getScrollHandler();
         this.selectionHandler = tableView.getSelectionHandler();
     }

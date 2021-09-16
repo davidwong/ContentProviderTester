@@ -49,7 +49,7 @@ import com.evrencoskun.tableview.filter.Filter;
 import com.evrencoskun.tableview.handler.ColumnSortHandler;
 import com.evrencoskun.tableview.handler.ColumnWidthHandler;
 import com.evrencoskun.tableview.handler.FilterHandler;
-import com.evrencoskun.tableview.handler.PreferencesHandler;
+import com.evrencoskun.tableview.handler.MyPreferencesHandler;
 import com.evrencoskun.tableview.handler.ScrollHandler;
 import com.evrencoskun.tableview.handler.SelectionHandler;
 import com.evrencoskun.tableview.handler.VisibilityHandler;
@@ -104,7 +104,7 @@ public class MyTableView extends FrameLayout implements ITableView {
     @Nullable
     private FilterHandler mFilterHandler;
     @NonNull
-    private PreferencesHandler mPreferencesHandler;
+    private MyPreferencesHandler mPreferencesHandler;
     @NonNull
     private ColumnWidthHandler mColumnWidthHandler;
 
@@ -267,7 +267,7 @@ public class MyTableView extends FrameLayout implements ITableView {
         mSelectionHandler = new SelectionHandler(this);
         mVisibilityHandler = new VisibilityHandler(this);
         mScrollHandler = new ScrollHandler(this);
-        mPreferencesHandler = new PreferencesHandler(this);
+        mPreferencesHandler = new MyPreferencesHandler(this);
         mColumnWidthHandler = new ColumnWidthHandler(this);
 
         initializeListeners();
