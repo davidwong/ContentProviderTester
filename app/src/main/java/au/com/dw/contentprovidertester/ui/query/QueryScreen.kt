@@ -61,10 +61,70 @@ import au.com.dw.contentprovidertester.util.LogCompositions
 @Composable
 fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
 {
+    // input values to make query, only uri is required and others are optional
+//    var uri by rememberSaveable { mutableStateOf("") }
+    var uri = rememberSaveable { TextNotEmptyState() }
+    var projection by rememberSaveable { mutableStateOf("") }
+    var selection by rememberSaveable { mutableStateOf("") }
+    var selectionArgs by rememberSaveable { mutableStateOf("") }
+    var sortOrder by rememberSaveable { mutableStateOf("") }
+
     // required for snackbars
     val scaffoldState = rememberScaffoldState()
 
     val querySampleFiller = QuerySampleFiller()
+    // internal value for composable shared by uri and projection dropdown lists - when a CONTENT_URI is
+    // selected in the uri dropdown, then the dropdown list for projection is updated to the
+    // appropriate column names for that CONTENT_URI
+    var projectionLookup by rememberSaveable { mutableStateOf(emptyMap<String, String>()) }
+    // for use in URI validation
+    val projectionFocusRequest = remember { FocusRequester() }
+
+    // composables for slot API used instead of passing input states so that they can be
+    // used for different layouts depending on orientation
+    val uriField: @Composable () -> Unit = {
+        DropDownValidatingField(uri,
+            "uri *",
+            ImeAction.Next,
+            { projectionFocusRequest.requestFocus() },
+            "uri dropdown",
+            querySampleFiller.uris,
+            { key, items ->
+                val uriData = items.get(key)!! as Pair<Uri, Map<String, String>>
+                uri.text  = uriData.first.toString()
+                projectionLookup = uriData.second
+            })
+    }
+    val projectionField: @Composable () -> Unit = {
+        DropDownField(projection, { projection = it },
+            "projection",
+            "projection dropdown",
+            projectionLookup,
+            { key, items ->
+                projection = addQueryColumn(projection, items.get(key)!! as String)
+            })
+    }
+    val selectionField: @Composable () -> Unit = { PlainField(selection, { selection = it } , "selection") }
+    val selectionArgsField: @Composable () -> Unit = { PlainField(selectionArgs, { selectionArgs = it } , "selectionArgs") }
+    val sortOrderField: @Composable () -> Unit = { PlainField(sortOrder, { sortOrder = it }  , "sortOrder") }
+    val queryButton: @Composable () -> Unit = {
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.Center)
+        {
+            val context = LocalContext.current
+            Button(
+                modifier = Modifier.padding(dimensionResource(id = R.dimen.buttonPadding)),
+                // invoke the query on the viewmodel
+                onClick = { vm.processQuery(context, uri.text, projection, selection, selectionArgs, sortOrder) }
+//                onClick = { onQuery(context, uri.text, projection, selection, selectionArgs, sortOrder) }
+//                enabled = uri.isValid
+            )
+            {
+                Text("Query")
+            }
+        }
+    }
 
     val isTwoColumnMode = (LocalConfiguration.current.orientation
             == Configuration.ORIENTATION_LANDSCAPE)
@@ -81,7 +141,7 @@ fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
      */
     vm.queryUiState.observeAsState().value?.let { uiState ->
         when (uiState) {
-            is QueryUiState.Loading -> LoadingIndicator(scaffoldState, querySampleFiller, vm::processQuery)
+//            is QueryUiState.Loading -> LoadingIndicator(scaffoldState, querySampleFiller, vm::processQuery)
             is QueryUiState.Success<*> -> {
                 // navigate to the results screen, instead of trying to pass the results as a complex
                 // parameter the result screen should share the viewmodel and access the result
@@ -94,14 +154,14 @@ fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
             is QueryUiState.Error -> {
                 val error = uiState as QueryUiState.Error
                 QueryError(scaffoldState = scaffoldState, errorMsg = error.message + ": " + error.exception.message, logMessage = "Query error", logThrowable = error.exception, vm::reset)
-                QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
+//                QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
             }
             is QueryUiState.Failure -> {
                 val failure = uiState as QueryUiState.Failure
                 QueryError(scaffoldState = scaffoldState, errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null, vm::reset)
-                QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
+//                QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
             }
-            else -> QueryScreen(scaffoldState = scaffoldState, querySampleFiller, vm::processQuery)
+            else -> QueryScreen(scaffoldState,  uriField, projectionField, selectionField, selectionArgsField, sortOrderField, queryButton)
         }
     }
 }
@@ -110,7 +170,13 @@ fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
  * Only need either query1 or query2 lambda for navigation depending on design alternative.
  */
 @Composable
-fun QueryScreen(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
+fun QueryScreen(scaffoldState: ScaffoldState,
+                uriField: @Composable () -> Unit,
+                projectionField: @Composable () -> Unit,
+                selectionField: @Composable () -> Unit,
+                selectionArgsField: @Composable () -> Unit,
+                sortOrderField: @Composable () -> Unit,
+                queryButton: @Composable () -> Unit)
 {
     LogCompositions("showForm")
     Scaffold(
@@ -123,20 +189,29 @@ fun QueryScreen(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFill
             )
         }
     ) { innerPadding ->
-        QueryBodyContent(Modifier.padding(innerPadding), querySampleFiller, onQuery)
+        // validation errors
+        val projectionFocusRequest = remember { FocusRequester() }
+
+        QueryBodyContent(Modifier.padding(innerPadding),
+            uriField,
+            projectionField,
+            selectionField,
+            selectionArgsField,
+            sortOrderField,
+            queryButton)
     }
 }
 
-@Composable
-fun LoadingIndicator(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
-{
-    LogCompositions("showProgress")
-    Box {
-        // show form first so that the progress bar appears above it
-        QueryScreen(scaffoldState, querySampleFiller, onQuery)
-        ProgressIndicator()
-    }
-}
+//@Composable
+//fun LoadingIndicator(scaffoldState: ScaffoldState, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
+//{
+//    LogCompositions("showProgress")
+//    Box {
+//        // show form first so that the progress bar appears above it
+//        QueryScreen(scaffoldState, querySampleFiller, onQuery)
+//        ProgressIndicator()
+//    }
+//}
 
 /**
  * Show snackbar when there has been a query error or the query has no results to show.
@@ -182,63 +257,20 @@ fun QueryError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: Strin
 }
 
 @Composable
-fun QueryBodyContent(modifier: Modifier = Modifier, querySampleFiller: QuerySampleFiller, onQuery: (Context, String, String?, String?, String?, String?) -> Unit)
-{
+fun QueryBodyContent(modifier: Modifier = Modifier,
+                     uriField: @Composable () -> Unit,
+                     projectinField: @Composable () -> Unit,
+                     selectionField: @Composable () -> Unit,
+                     selectionArgsField: @Composable () -> Unit,
+                     sortOrderField: @Composable () -> Unit,
+                     queryButton: @Composable () -> Unit) {
     Column(modifier = modifier.verticalScroll(rememberScrollState())) {
-        // internal value for composable shared by uri and projection dropdown lists - when a CONTENT_URI is
-        // selected in the uri dropdown, then the dropdown list for projection is updated to the
-        // appropriate column names for that CONTENT_URI
-        var projectionLookup by rememberSaveable { mutableStateOf(emptyMap<String, String>()) }
-
-        // input values to make query, only uri is required and others are optional
-        var uri = rememberSaveable { TextNotEmptyState() }
-        var projection by rememberSaveable { mutableStateOf("") }
-        var selection by rememberSaveable { mutableStateOf("") }
-        var selectionArgs by rememberSaveable { mutableStateOf("") }
-        var sortOrder by rememberSaveable { mutableStateOf("") }
-
-        // validation errors
-        val projectionFocusRequest = remember { FocusRequester() }
-
-        DropDownValidatingField(uri,
-            "uri *",
-            ImeAction.Next,
-            { projectionFocusRequest.requestFocus() },
-            "uri dropdown",
-            querySampleFiller.uris,
-            { key, items ->
-                val uriData = items.get(key)!! as Pair<Uri, Map<String, String>>
-                uri.text  = uriData.first.toString()
-                projectionLookup = uriData.second
-            })
-
-        DropDownField(projection, { projection = it },
-            "projection",
-            "projection dropdown",
-            projectionLookup,
-            { key, items ->
-                projection = addQueryColumn(projection, items.get(key)!! as String)
-            })
-
-        PlainField(selection, { selection = it } , "selection")
-        PlainField(selectionArgs, { selectionArgs = it } , "selectionArgs")
-        PlainField(sortOrder, { sortOrder = it } , "sortOrder")
-
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center)
-        {
-            val context = LocalContext.current
-            Button(
-                modifier = Modifier.padding(dimensionResource(id = R.dimen.buttonPadding)),
-                // invoke the query on the viewmodel
-                onClick = { onQuery(context, uri.text, projection, selection, selectionArgs, sortOrder) },
-                enabled = uri.isValid
-            )
-            {
-                Text("Query")
-            }
-        }
+        uriField()
+        projectinField()
+        selectionField()
+        selectionArgsField()
+        sortOrderField()
+        queryButton()
     }
 }
 
@@ -255,11 +287,11 @@ fun addQueryColumn(projection : String, newValue : String): String {
     }
 }
 
-@Preview
-@Composable
-fun PreviewQueryScreen() {
-    val querySampleFiller = QuerySampleFiller()
-
-    QueryScreen(rememberScaffoldState(), querySampleFiller) { c, s1, s2, s3, s4, s5 -> Unit }
-}
+//@Preview
+//@Composable
+//fun PreviewQueryScreen() {
+//    val querySampleFiller = QuerySampleFiller()
+//
+//    QueryScreen(rememberScaffoldState(), querySampleFiller) { c, s1, s2, s3, s4, s5 -> Unit }
+//}
 
