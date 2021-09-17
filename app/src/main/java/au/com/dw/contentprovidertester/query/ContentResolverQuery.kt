@@ -7,8 +7,8 @@ import android.net.Uri
 import android.util.Log
 import au.com.dw.contentprovidertester.data.model.QueryResult
 import au.com.dw.contentprovidertester.query.model.QueryParam
+import au.com.dw.contentprovidertester.query.model.QueryResultHolder
 import au.com.dw.contentprovidertester.query.model.SecondaryQuery
-import au.com.dw.contentprovidertester.ui.QueryUiState
 import javax.inject.Inject
 
 /**
@@ -22,12 +22,8 @@ class ContentResolverQuery @Inject constructor() {
 
     /**
      * This the entry into the query process.
-     *
-     * Should really be using QueryUiState here since that is used to drive the view.
-     * Ideally would have another query result type for back end requests that is translated to
-     * QueryUiState in the viewmodel to drive the view.
      */
-    fun processQuery(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>): QueryUiState<Any>
+    fun processQuery(context: Context, params: QueryParam, secondaryQueries: List<SecondaryQuery>): QueryResultHolder<Any>
     {
         try {
             val startTime = System.nanoTime()
@@ -36,7 +32,7 @@ class ContentResolverQuery @Inject constructor() {
 
             // ignore timings in debug mode, due to debug logging adding extra time
             if (queryResult.size > 0) {
-                return QueryUiState.Success(
+                return QueryResultHolder.Success(
                     processResult(
                         queryResult,
                         params,
@@ -46,11 +42,11 @@ class ContentResolverQuery @Inject constructor() {
             }
             else
             {
-                return QueryUiState.Failure("No results for query " + params.uri.toString())
+                return QueryResultHolder.Failure("No results for query " + params.uri.toString())
             }
         } catch (e: Exception)
         {
-            return QueryUiState.Error("Query error for query "+ params.uri.toString(), e)
+            return QueryResultHolder.Error("Query error for query "+ params.uri.toString(), e)
         }
     }
 

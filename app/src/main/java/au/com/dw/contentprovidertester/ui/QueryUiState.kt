@@ -13,17 +13,17 @@ sealed class QueryUiState<out T : Any> {
         data class Success<out T : Any>(val data: T) : QueryUiState<T>()
 
         // A query that returns no results is considered a failure in terms of display data
-        data class Failure(val message: String) : QueryUiState<Nothing>()
+        data class Failure(val message: String, val counter: Int) : QueryUiState<Nothing>()
 
-        data class Error(val message: String, val exception: Exception) : QueryUiState<Nothing>()
+        data class Error(val message: String, val exception: Exception, val counter: Int) : QueryUiState<Nothing>()
 
         override fun toString(): String {
                 return when (this) {
                         is Idle -> "Idle"
                         is Loading -> "Loading"
                         is Success<*> -> "Success[data=$data]"
-                        is Failure -> "Failure[message=$message]"
-                        is Error -> "Error[message=$message, exception=$exception]"
+                        is Failure -> "Failure[message=$message, counter=$counter]"
+                        is Error -> "Error[message=$message, exception=$exception, counter=$counter]"
                 }
         }
 }

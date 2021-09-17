@@ -32,6 +32,8 @@ import au.com.dw.contentprovidertester.ui.QueryViewModel
 import au.com.dw.contentprovidertester.ui.common.*
 import au.com.dw.contentprovidertester.ui.navigation.Screen
 import au.com.dw.contentprovidertester.util.LogCompositions
+import au.com.dw.contentprovidertester.util.Ref
+import kotlinx.coroutines.launch
 
 /**
  * 2 Alternate designs to test which works best:
@@ -153,12 +155,12 @@ fun QueryScreenHandler(vm: QueryViewModel, navController: NavController)
             }
             is QueryUiState.Error -> {
                 val error = uiState as QueryUiState.Error
-                QueryError(scaffoldState = scaffoldState, errorMsg = error.message + ": " + error.exception.message, logMessage = "Query error", logThrowable = error.exception, vm::reset)
+                QueryError(scaffoldState = scaffoldState, error.message + ": " + error.exception.message, error.counter, logMessage = "Query error", logThrowable = error.exception)
                 QueryScreen(scaffoldState,  uriField, projectionField, selectionField, selectionArgsField, sortOrderField, queryButton)
             }
             is QueryUiState.Failure -> {
                 val failure = uiState as QueryUiState.Failure
-                QueryError(scaffoldState = scaffoldState, errorMsg = failure.message, logMessage = "Query failure: " + failure.message, logThrowable = null, vm::reset)
+                QueryError(scaffoldState = scaffoldState, failure.message, failure.counter, logMessage = "Query failure: " + failure.message, logThrowable = null)
                 QueryScreen(scaffoldState,  uriField, projectionField, selectionField, selectionArgsField, sortOrderField, queryButton)
             }
             else -> QueryScreen(scaffoldState,  uriField, projectionField, selectionField, selectionArgsField, sortOrderField, queryButton)
@@ -200,19 +202,18 @@ fun QueryScreen(scaffoldState: ScaffoldState,
     }
 }
 
+class SnackbarRef(var value: Int)
 /**
  * Show snackbar when there has been a query error or the query has no results to show.
  *
- * todo: 2 problems
- * 1. After the snackbar is shown, if the same error or failure occurs again (with the same error
- * message) then the snackbar doesn't show again.
- * 2. On orientation change when the snackbar has already show, the snackbar will popup again since
+ * todo
+ * On orientation change when the snackbar has already show, the snackbar will popup again since
  * the UI state is still set to error or failure. Tried resetting UI state to idle after the snackbar
  * is dismissed, but then the whole form is refreshed and the URI field is wiped
  *
  */
 @Composable
-fun QueryError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: String?, logThrowable: Throwable?, onDismiss: () -> Unit)
+fun QueryError(scaffoldState: ScaffoldState, errorMsg: String, errorCount: Int, logMessage: String?, logThrowable: Throwable?)
 {
     LogCompositions("showError")
     if (null == logThrowable)
@@ -223,24 +224,19 @@ fun QueryError(scaffoldState: ScaffoldState, errorMsg: String, logMessage: Strin
         Log.e("QueryScreen", logMessage, logThrowable)
     }
 
-    // can't use `scaffoldState.snackbarHostState` as the key as per documentation, as scaffoldState.snackbarHostState.showSnackbar
-    // resets currentSnackbarData after the snackbar has displayed, which means the snackbar would
-    // only display once as the snackbarHostState key doesn't change.
-//    LaunchedEffect(scaffoldState.snackbarHostState) {
-    LaunchedEffect(errorMsg) {
+    // Note that the error count is used as the key as it is unique for each query.
+    // This ensures that the snackbar error message gets displayed for each separate query even if
+    // the result is the same error/failure.
+    LaunchedEffect(errorCount) {
         // can't use LogCompositions here since it is only allowed inside composable function
         Log.d("Compositions: ", "snackbar")
 
         val snackbarResult = scaffoldState.snackbarHostState.showSnackbar(
             message = "Error in query: " + errorMsg
         )
-//        if (snackbarResult == SnackbarResult.Dismissed)
-//        {
-//            Log.d("Compositions: ", "snackbar dismissed")
-//            onDismiss.invoke()
-//        }
 
     }
+
 }
 
 @Composable

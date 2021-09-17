@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import au.com.dw.contentprovidertester.query.ContentResolverQuery
 import au.com.dw.contentprovidertester.query.model.QueryParam
+import au.com.dw.contentprovidertester.query.model.QueryResultHolder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
@@ -19,6 +20,14 @@ class QueryViewModel @Inject constructor(
 
     private val queryResult = MutableLiveData<QueryUiState<Any>>(QueryUiState.Idle)
     val queryUiState : LiveData<QueryUiState<Any>> = queryResult
+
+    /**
+     * An extra error counter is added to the UI state when there is an error or failure. This is because
+     * it can be used as the key for the LaunchedEffect that displays the error
+     * message in a snackbar. This ensures that the snackbar is shown for every query even if it is
+     * the same error/failure.
+     */
+    private var errorCount = 0
 
     fun processQuery(context: Context, uri: String, projection: String?, selection: String?, selectionArgs: String?, sortOrder: String?) {
         queryResult.value = QueryUiState.Loading
@@ -38,10 +47,18 @@ class QueryViewModel @Inject constructor(
 //        val unescapedUri = unEscapeUriString(uri)
 
         val queryParam = QueryParam(
-            Uri.parse(uri), checkQueryStringArray(projection),
-            checkQueryString(selection), checkQueryStringArray(selectionArgs), checkQueryString(sortOrder)
+            Uri.parse(uri),
+            checkQueryStringArray(projection),
+            checkQueryString(selection),
+            checkQueryStringArray(selectionArgs),
+            checkQueryString(sortOrder)
         )
-        queryResult.value = contentResolverQuery.processQuery(context, queryParam, emptyList())
+        val resultHolder = contentResolverQuery.processQuery(context, queryParam, emptyList())
+        when (resultHolder) {
+            is QueryResultHolder.Success -> queryResult.value = QueryUiState.Success(resultHolder.data)
+            is QueryResultHolder.Failure -> queryResult.value = QueryUiState.Failure(resultHolder.message, errorCount++)
+            is QueryResultHolder.Error -> queryResult.value = QueryUiState.Error(resultHolder.message, resultHolder.exception, errorCount++)
+        }
     }
 
     /**
